@@ -1,0 +1,116 @@
+{
+  "brand": "CARETAP",
+  "nav": {
+    "today": "今日",
+    "log": "記錄",
+    "history": "歷史",
+    "settings": "設定"
+  },
+  "card_types": {
+    "medications": "用藥紀錄",
+    "blood_pressure": "血壓紀錄",
+    "body_temperature": "體溫紀錄",
+    "blood_sugar": "血糖紀錄",
+    "wound_care": "傷口照護",
+    "meal_log": "用餐紀錄"
+  },
+  "confirmation": {
+    "logged_en": "Logged",
+    "logged_zh": "已記錄",
+    "logged_id": "Berhasil dicatat",
+    "add_note": "新增備註（選填）",
+    "todays_count": "{{cardType}} · 今天已記錄 {{count}} 次",
+    "add_photo": "新增照片（選填）",
+    "back_home": "← 返回首頁"
+  },
+  "meal_intake": {
+    "label": "這餐吃了多少？",
+    "finished": "完整用餐（>75%）",
+    "partial": "部分用餐（<75%）",
+    "refused": "拒食／幾乎未吃",
+    "soft_only": "軟食／流質",
+    "hydration": "只喝流質"
+  },
+  "hydration": {
+    "label": "水分攝取",
+    "good": "充足",
+    "low": "偏少",
+    "refused": "拒絕"
+  },
+  "vitals": {
+    "bp_sys": "收縮壓（上壓）",
+    "bp_dia": "舒張壓（下壓）",
+    "pulse": "心跳",
+    "normal_range": "正常值：收縮壓 <120 / 舒張壓 <80",
+    "temp_label": "體溫",
+    "temp_normal": "正常範圍：36.1–37.2°C",
+    "glucose_label": "血糖值",
+    "glucose_timing": "測量時間點",
+    "before_meal": "餐前",
+    "after_meal": "餐後",
+    "fasting": "空腹",
+    "glucose_normal": "正常值：空腹 3.9–6.1 / 餐後 <7.8 mmol/L"
+  },
+  "alerts": {
+    "bp_high": "血壓偏高",
+    "bp_low": "血壓偏低",
+    "temp_high": "體溫偏高",
+    "temp_low": "體溫偏低",
+    "glucose_high": "血糖偏高",
+    "meal_refused": "{{name}} 拒絕進食",
+    "medication_due": "用藥時間可能到了",
+    "high_badge": "偏高"
+  },
+  "settings": {
+    "language": "顯示語言",
+    "invite": "邀請家人",
+    "invite_link": "分享此連結：",
+    "notifications": "推播通知",
+    "sign_out": "登出"
+  },
+  "onboarding": {
+    "step1_title": "您在照顧誰？",
+    "step2_title": "您的身份是？",
+    "step3_title": "用藥提醒設定",
+    "step4_title": "邀請家人",
+    "role_caregiver": "我是照顧者",
+    "role_family": "我是家庭成員",
+    "skip": "略過"
+  },
+  "history": {
+    "export": "匯出給醫生",
+    "last_30": "最近 30 天",
+    "no_data": "此期間尚無紀錄"
+  },
+  "common": {
+    "save": "儲存",
+    "cancel": "取消",
+    "loading": "載入中...",
+    "optional": "選填",
+    "retry": "重試",
+    "remove": "移除",
+    "copy": "複製",
+    "copied": "已複製！",
+    "continue": "繼續",
+    "done": "完成",
+    "back": "上一步",
+    "next": "下一步"
+  },
+  "login": {
+    "title": "CARETAP",
+    "subtitle": "為家人記錄照護",
+    "email": "電子郵件",
+    "send_link": "傳送登入連結給我",
+    "check_email": "請至您的信箱查看登入連結",
+    "use_password": "改用密碼登入",
+    "password": "密碼",
+    "sign_in": "登入",
+    "join_invite": "透過邀請連結加入"
+  },
+  "elder_selector": {
+    "title": "您要為誰記錄？"
+  },
+  "today_screen": {
+    "medications_due": "用藥時間可能到了"
+  }
+}

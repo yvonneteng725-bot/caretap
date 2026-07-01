@@ -1,0 +1,116 @@
+{
+  "brand": "CARETAP",
+  "nav": {
+    "today": "Today",
+    "log": "Log",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "card_types": {
+    "medications": "Medications",
+    "blood_pressure": "Blood Pressure",
+    "body_temperature": "Body Temperature",
+    "blood_sugar": "Blood Sugar",
+    "wound_care": "Wound Care",
+    "meal_log": "Meal Log"
+  },
+  "confirmation": {
+    "logged_en": "Logged",
+    "logged_zh": "已記錄",
+    "logged_id": "Berhasil dicatat",
+    "add_note": "Add a note... (optional)",
+    "todays_count": "{{cardType}} · {{count}}× today",
+    "add_photo": "Add photo (optional)",
+    "back_home": "← Back to home"
+  },
+  "meal_intake": {
+    "label": "How much did they eat?",
+    "finished": "Finished (>75%)",
+    "partial": "Partial (<75%)",
+    "refused": "Refused / barely ate",
+    "soft_only": "Soft / purée only",
+    "hydration": "Fluids only"
+  },
+  "hydration": {
+    "label": "Hydration",
+    "good": "Good",
+    "low": "Low",
+    "refused": "Refused"
+  },
+  "vitals": {
+    "bp_sys": "SYS (upper)",
+    "bp_dia": "DIA (lower)",
+    "pulse": "Pulse",
+    "normal_range": "Normal: SYS <120 / DIA <80",
+    "temp_label": "Temperature",
+    "temp_normal": "Normal: 36.1–37.2°C",
+    "glucose_label": "Glucose",
+    "glucose_timing": "When was this measured?",
+    "before_meal": "Before meal",
+    "after_meal": "After meal",
+    "fasting": "Fasting",
+    "glucose_normal": "Normal: 3.9–6.1 fasting / <7.8 after meal"
+  },
+  "alerts": {
+    "bp_high": "Blood pressure is elevated",
+    "bp_low": "Blood pressure is low",
+    "temp_high": "Temperature is above normal",
+    "temp_low": "Temperature is below normal",
+    "glucose_high": "Glucose is elevated",
+    "meal_refused": "{{name}} refused their meal",
+    "medication_due": "Medications may be due",
+    "high_badge": "High"
+  },
+  "settings": {
+    "language": "Display language",
+    "invite": "Invite family member",
+    "invite_link": "Share this link:",
+    "notifications": "Push notifications",
+    "sign_out": "Sign out"
+  },
+  "onboarding": {
+    "step1_title": "Who are you caring for?",
+    "step2_title": "What is your role?",
+    "step3_title": "Medication reminders",
+    "step4_title": "Invite family",
+    "role_caregiver": "I'm the caregiver",
+    "role_family": "I'm a family member",
+    "skip": "Skip"
+  },
+  "history": {
+    "export": "Export for doctor",
+    "last_30": "Last 30 days",
+    "no_data": "No logs yet for this period"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "optional": "optional",
+    "retry": "Retry",
+    "remove": "Remove",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "continue": "Continue",
+    "done": "Done",
+    "back": "Back",
+    "next": "Next"
+  },
+  "login": {
+    "title": "CARETAP",
+    "subtitle": "Care logging for your family",
+    "email": "Email address",
+    "send_link": "Send me a login link",
+    "check_email": "Check your email for the login link",
+    "use_password": "Use a password instead",
+    "password": "Password",
+    "sign_in": "Sign in",
+    "join_invite": "Join via invite link"
+  },
+  "elder_selector": {
+    "title": "Who are you logging for?"
+  },
+  "today_screen": {
+    "medications_due": "Medications may be due"
+  }
+}

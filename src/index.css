@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-bg text-text-primary;
+    font-family: 'Inter Tight', 'Noto Sans TC', sans-serif;
+    font-weight: 300;
+    margin: 0;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+
+  input,
+  button,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+
+  input {
+    font-weight: 400;
+  }
+}
+
+@layer utilities {
+  .brand-label {
+    font-weight: 200;
+    letter-spacing: 0.3em;
+    color: #9a8c7e;
+  }
+
+  .hairline {
+    border-top: 0.5px solid rgba(200, 184, 154, 0.4);
+    opacity: 0.3;
+  }
+
+  .fade-in-delayed {
+    opacity: 0;
+    animation: fadeIn 0.6s ease-out 4s forwards;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+}

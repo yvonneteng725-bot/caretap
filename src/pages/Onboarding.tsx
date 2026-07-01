@@ -1,0 +1,230 @@
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { Check } from 'lucide-react'
+import { useAuthStore } from '../store/authStore'
+import { useElderStore } from '../store/elderStore'
+import { supabase } from '../lib/supabase'
+import { saveMedicationSchedule } from '../lib/medicationSchedule'
+import { createInvite } from '../lib/invites'
+import { compressPhoto } from '../lib/compressPhoto'
+import { Camera } from 'lucide-react'
+
+const STEPS = 4
+
+export default function Onboarding() {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const user = useAuthStore((s) => s.user)
+  const fetchElders = useElderStore((s) => s.fetchElders)
+  const selectElder = useElderStore((s) => s.selectElder)
+
+  const [step, setStep] = useState(1)
+  const [elderId, setElderId] = useState<string | null>(null)
+
+  // Step 1
+  const [name, setName] = useState('')
+  const [dob, setDob] = useState('')
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+
+  // Step 2
+  const [role, setRole] = useState<'caregiver' | 'family'>('caregiver')
+
+  // Step 3
+  const [times, setTimes] = useState<string[]>(['08:00', '13:00', '20:00', ''])
+
+  // Step 4
+  const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  const finish = async () => {
+    if (user) await fetchElders(user.id)
+    navigate('/today', { replace: true })
+  }
+
+  const handleStep1 = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || !name.trim()) return
+
+    const { data: elder, error } = await supabase
+      .from('elders')
+      .insert({ name: name.trim(), date_of_birth: dob || null, created_by: user.id })
+      .select()
+      .single()
+
+    if (error || !elder) return
+
+    await supabase.from('elder_access').insert({ elder_id: elder.id, user_id: user.id, role: 'admin' })
+
+    if (photoFile) {
+      const compressed = await compressPhoto(photoFile, 150)
+      const path = `${user.id}/elder-${elder.id}.jpg`
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
+      if (!uploadError) {
+        const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+        await supabase.from('elders').update({ photo_url: data.publicUrl }).eq('id', elder.id)
+      }
+    }
+
+    setElderId(elder.id)
+    selectElder(elder.id)
+    setStep(2)
+  }
+
+  const handleStep2 = async () => {
+    if (user) {
+      await supabase.from('profiles').update({ role }).eq('id', user.id)
+    }
+    setStep(3)
+  }
+
+  const handleStep3Save = async () => {
+    if (elderId) await saveMedicationSchedule(elderId, times.filter(Boolean))
+    setStep(4)
+  }
+
+  const handleInvite = async () => {
+    if (!elderId) return
+    const link = await createInvite(elderId, 'family')
+    setInviteLink(link)
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col bg-surface px-6 py-8">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-1.5">
+          {Array.from({ length: STEPS }, (_, i) => (
+            <span
+              key={i}
+              className={`h-1.5 w-6 rounded-full ${i + 1 <= step ? 'bg-medications-accent' : 'bg-divider'}`}
+            />
+          ))}
+        </div>
+        {step > 1 && (
+          <button onClick={() => (step === STEPS ? finish() : setStep(step + 1))} className="text-xs font-light text-text-muted">
+            {t('onboarding.skip')}
+          </button>
+        )}
+      </div>
+
+      {step === 1 && (
+        <form onSubmit={handleStep1} className="mt-10 flex flex-1 flex-col">
+          <h1 className="text-lg font-light text-text-primary">{t('onboarding.step1_title')}</h1>
+          <input
+            autoFocus
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            className="mt-6 rounded-full border border-divider bg-bg px-5 py-3 text-sm outline-none"
+          />
+          <input
+            type="date"
+            value={dob}
+            onChange={(e) => setDob(e.target.value)}
+            className="mt-3 rounded-full border border-divider bg-bg px-5 py-3 text-sm outline-none"
+          />
+
+          <label className="mt-3 flex items-center gap-2 self-start rounded-full bg-bg px-4 py-2.5 text-xs font-light text-text-secondary">
+            <Camera size={14} strokeWidth={1.5} />
+            {t('common.optional')}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null
+                setPhotoFile(file)
+                if (file) setPhotoPreview(URL.createObjectURL(file))
+              }}
+            />
+          </label>
+          {photoPreview && <img src={photoPreview} alt="" className="mt-2 h-16 w-16 rounded-full object-cover" />}
+
+          <button type="submit" className="mt-auto rounded-full bg-medications-accent py-3 text-sm font-light text-white">
+            {t('common.next')}
+          </button>
+        </form>
+      )}
+
+      {step === 2 && (
+        <div className="mt-10 flex flex-1 flex-col">
+          <h1 className="text-lg font-light text-text-primary">{t('onboarding.step2_title')}</h1>
+          <div className="mt-6 flex flex-col gap-3">
+            {(['caregiver', 'family'] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className={`rounded-full px-6 py-4 text-left text-sm font-light ${
+                  role === r ? 'bg-medications-accent text-white' : 'bg-bg text-text-primary'
+                }`}
+              >
+                {t(`onboarding.role_${r}`)}
+              </button>
+            ))}
+          </div>
+          <button onClick={handleStep2} className="mt-auto rounded-full bg-medications-accent py-3 text-sm font-light text-white">
+            {t('common.next')}
+          </button>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="mt-10 flex flex-1 flex-col">
+          <h1 className="text-lg font-light text-text-primary">{t('onboarding.step3_title')}</h1>
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            {times.map((time, i) => (
+              <input
+                key={i}
+                type="time"
+                value={time}
+                onChange={(e) => setTimes((prev) => prev.map((t2, idx) => (idx === i ? e.target.value : t2)))}
+                className="rounded-full border border-divider bg-bg px-4 py-2.5 text-sm outline-none"
+              />
+            ))}
+          </div>
+          <button onClick={handleStep3Save} className="mt-auto rounded-full bg-medications-accent py-3 text-sm font-light text-white">
+            {t('common.next')}
+          </button>
+        </div>
+      )}
+
+      {step === 4 && (
+        <div className="mt-10 flex flex-1 flex-col">
+          <h1 className="text-lg font-light text-text-primary">{t('onboarding.step4_title')}</h1>
+
+          {inviteLink ? (
+            <div className="mt-6 flex items-center gap-2 rounded-full bg-bg px-4 py-3">
+              <span className="flex-1 truncate text-xs font-light text-text-primary">{inviteLink}</span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(inviteLink)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+              >
+                {copied ? <Check size={15} className="text-medications-accent" /> : (
+                  <span className="text-xs font-light text-text-secondary">{t('common.copy')}</span>
+                )}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleInvite}
+              className="mt-6 rounded-full bg-medications-accent py-3 text-sm font-light text-white"
+            >
+              {t('settings.invite')}
+            </button>
+          )}
+
+          <button onClick={finish} className="mt-auto rounded-full bg-medications-dark py-3 text-sm font-light text-white">
+            {t('common.done')}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

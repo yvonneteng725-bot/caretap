@@ -1,0 +1,116 @@
+{
+  "brand": "CARETAP",
+  "nav": {
+    "today": "Hari Ini",
+    "log": "Catat",
+    "history": "Riwayat",
+    "settings": "Pengaturan"
+  },
+  "card_types": {
+    "medications": "Obat",
+    "blood_pressure": "Tekanan Darah",
+    "body_temperature": "Suhu Tubuh",
+    "blood_sugar": "Gula Darah",
+    "wound_care": "Perawatan Luka",
+    "meal_log": "Catatan Makan"
+  },
+  "confirmation": {
+    "logged_en": "Logged",
+    "logged_zh": "已記錄",
+    "logged_id": "Berhasil dicatat",
+    "add_note": "Tambah catatan (opsional)",
+    "todays_count": "{{cardType}} · {{count}}× hari ini",
+    "add_photo": "Tambah foto (opsional)",
+    "back_home": "← Kembali ke beranda"
+  },
+  "meal_intake": {
+    "label": "Berapa banyak yang dimakan?",
+    "finished": "Habis (>75%)",
+    "partial": "Tidak habis (<75%)",
+    "refused": "Menolak / hampir tidak makan",
+    "soft_only": "Makanan lunak / bubur saja",
+    "hydration": "Hanya minum, tidak makan"
+  },
+  "hydration": {
+    "label": "Asupan cairan",
+    "good": "Cukup",
+    "low": "Kurang",
+    "refused": "Menolak"
+  },
+  "vitals": {
+    "bp_sys": "Sistolik (atas)",
+    "bp_dia": "Diastolik (bawah)",
+    "pulse": "Denyut nadi",
+    "normal_range": "Normal: Sistolik <120 / Diastolik <80",
+    "temp_label": "Suhu",
+    "temp_normal": "Normal: 36,1–37,2°C",
+    "glucose_label": "Kadar gula darah",
+    "glucose_timing": "Kapan diukur?",
+    "before_meal": "Sebelum makan",
+    "after_meal": "Setelah makan",
+    "fasting": "Puasa",
+    "glucose_normal": "Normal: puasa 3,9–6,1 / setelah makan <7,8 mmol/L"
+  },
+  "alerts": {
+    "bp_high": "Tekanan darah tinggi",
+    "bp_low": "Tekanan darah rendah",
+    "temp_high": "Suhu di atas normal",
+    "temp_low": "Suhu di bawah normal",
+    "glucose_high": "Gula darah tinggi",
+    "meal_refused": "{{name}} menolak makan",
+    "medication_due": "Waktunya minum obat",
+    "high_badge": "Tinggi"
+  },
+  "settings": {
+    "language": "Bahasa tampilan",
+    "invite": "Undang anggota keluarga",
+    "invite_link": "Bagikan tautan ini:",
+    "notifications": "Notifikasi push",
+    "sign_out": "Keluar"
+  },
+  "onboarding": {
+    "step1_title": "Siapa yang Anda rawat?",
+    "step2_title": "Apa peran Anda?",
+    "step3_title": "Pengingat obat",
+    "step4_title": "Undang keluarga",
+    "role_caregiver": "Saya pengasuh",
+    "role_family": "Saya anggota keluarga",
+    "skip": "Lewati"
+  },
+  "history": {
+    "export": "Ekspor untuk dokter",
+    "last_30": "30 hari terakhir",
+    "no_data": "Belum ada catatan dalam periode ini"
+  },
+  "common": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "loading": "Memuat...",
+    "optional": "opsional",
+    "retry": "Coba lagi",
+    "remove": "Hapus",
+    "copy": "Salin",
+    "copied": "Tersalin!",
+    "continue": "Lanjutkan",
+    "done": "Selesai",
+    "back": "Kembali",
+    "next": "Berikutnya"
+  },
+  "login": {
+    "title": "CARETAP",
+    "subtitle": "Catatan perawatan untuk keluarga Anda",
+    "email": "Alamat email",
+    "send_link": "Kirim tautan masuk",
+    "check_email": "Periksa email Anda untuk tautan masuk",
+    "use_password": "Gunakan kata sandi",
+    "password": "Kata sandi",
+    "sign_in": "Masuk",
+    "join_invite": "Gabung lewat tautan undangan"
+  },
+  "elder_selector": {
+    "title": "Untuk siapa Anda mencatat?"
+  },
+  "today_screen": {
+    "medications_due": "Waktunya minum obat"
+  }
+}
