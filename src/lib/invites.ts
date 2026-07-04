@@ -43,8 +43,8 @@ export async function createInvite(elderId: string, role: UserRole = 'family'): 
   return `${import.meta.env.VITE_APP_URL}/join/${data.token}`
 }
 
-export async function redeemInvite(token: string): Promise<{ elder_id: string } > {
+export async function redeemInvite(token: string): Promise<{ elder_id: string }> {
   const { data, error } = await supabase.rpc('redeem_invite', { invite_token: token })
   if (error) throw error
-  return data
+  return { elder_id: data as string }
 }

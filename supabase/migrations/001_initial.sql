@@ -116,6 +116,34 @@ create trigger on_auth_user_created
   for each row execute procedure public.handle_new_user();
 
 -- ============================================================
+-- RLS helper functions
+--
+-- Policies on elder_access cannot query elder_access directly (Postgres
+-- raises "infinite recursion detected in policy"), and other tables'
+-- policies repeat the same membership check. These security-definer
+-- functions bypass RLS for the lookup itself, breaking the recursion.
+-- ============================================================
+
+create or replace function public.has_elder_access(p_elder_id uuid)
+returns boolean as $$
+  select exists (
+    select 1 from elder_access
+    where elder_id = p_elder_id and user_id = auth.uid()
+  );
+$$ language sql security definer stable set search_path = public;
+
+create or replace function public.is_elder_admin(p_elder_id uuid)
+returns boolean as $$
+  select exists (
+    select 1 from elder_access
+    where elder_id = p_elder_id and user_id = auth.uid() and role = 'admin'
+  );
+$$ language sql security definer stable set search_path = public;
+
+grant execute on function public.has_elder_access(uuid) to authenticated;
+grant execute on function public.is_elder_admin(uuid) to authenticated;
+
+-- ============================================================
 -- Row Level Security
 -- ============================================================
 
@@ -137,90 +165,48 @@ create policy "profiles_insert_own" on profiles
 
 -- elders: user can read elders they have a row in elder_access for
 create policy "elders_select_with_access" on elders
-  for select using (
-    exists (select 1 from elder_access where elder_access.elder_id = elders.id and elder_access.user_id = auth.uid())
-  );
+  for select using (has_elder_access(id));
 create policy "elders_insert_self" on elders
   for insert with check (created_by = auth.uid());
 create policy "elders_update_admin" on elders
-  for update using (
-    exists (
-      select 1 from elder_access
-      where elder_access.elder_id = elders.id
-        and elder_access.user_id = auth.uid()
-        and elder_access.role = 'admin'
-    )
-  );
+  for update using (is_elder_admin(id));
 
--- elder_access: user can read rows for elders they belong to; admin role can insert/delete
+-- elder_access: user can read rows for elders they belong to; admins manage
+-- membership. Self-grant of the admin role is only allowed to the user who
+-- created the elder (the onboarding flow), never on someone else's elder.
 create policy "elder_access_select_member" on elder_access
   for select using (
-    user_id = auth.uid()
-    or exists (
-      select 1 from elder_access ea2
-      where ea2.elder_id = elder_access.elder_id
-        and ea2.user_id = auth.uid()
-        and ea2.role = 'admin'
-    )
+    user_id = auth.uid() or is_elder_admin(elder_id)
   );
-create policy "elder_access_insert_self_or_admin" on elder_access
+create policy "elder_access_insert_creator_or_admin" on elder_access
   for insert with check (
-    (user_id = auth.uid() and role = 'admin')
-    or exists (
-      select 1 from elder_access ea2
-      where ea2.elder_id = elder_access.elder_id
-        and ea2.user_id = auth.uid()
-        and ea2.role = 'admin'
+    (
+      user_id = auth.uid()
+      and role = 'admin'
+      and exists (select 1 from elders where elders.id = elder_id and elders.created_by = auth.uid())
     )
+    or is_elder_admin(elder_id)
   );
 create policy "elder_access_delete_admin" on elder_access
-  for delete using (
-    exists (
-      select 1 from elder_access ea2
-      where ea2.elder_id = elder_access.elder_id
-        and ea2.user_id = auth.uid()
-        and ea2.role = 'admin'
-    )
-  );
+  for delete using (is_elder_admin(elder_id));
 
 -- logs: user can read and insert logs only for elders they have access to
 create policy "logs_select_with_access" on logs
-  for select using (
-    exists (select 1 from elder_access where elder_access.elder_id = logs.elder_id and elder_access.user_id = auth.uid())
-  );
+  for select using (has_elder_access(elder_id));
 create policy "logs_insert_with_access" on logs
   for insert with check (
-    logged_by = auth.uid()
-    and exists (select 1 from elder_access where elder_access.elder_id = logs.elder_id and elder_access.user_id = auth.uid())
+    logged_by = auth.uid() and has_elder_access(elder_id)
   );
 create policy "logs_update_with_access" on logs
-  for update using (
-    exists (select 1 from elder_access where elder_access.elder_id = logs.elder_id and elder_access.user_id = auth.uid())
-  );
+  for update using (has_elder_access(elder_id));
 
 -- medication_schedules: readable by anyone with elder access; writable by admin only
 create policy "medication_schedules_select_with_access" on medication_schedules
-  for select using (
-    exists (select 1 from elder_access where elder_access.elder_id = medication_schedules.elder_id and elder_access.user_id = auth.uid())
-  );
+  for select using (has_elder_access(elder_id));
 create policy "medication_schedules_insert_admin" on medication_schedules
-  for insert with check (
-    exists (
-      select 1 from elder_access
-      where elder_access.elder_id = medication_schedules.elder_id
-        and elder_access.user_id = auth.uid()
-        and elder_access.role = 'admin'
-    )
-  );
+  for insert with check (is_elder_admin(elder_id));
 create policy "medication_schedules_update_admin" on medication_schedules
-  for update using (
-    exists (
-      select 1 from elder_access
-      where elder_access.elder_id = medication_schedules.elder_id
-        and elder_access.user_id = auth.uid()
-        and elder_access.role = 'admin'
-    )
-  );
+  for update using (is_elder_admin(elder_id));
 
 -- push_subscriptions: user can read/write only their own rows
 create policy "push_subscriptions_select_own" on push_subscriptions
@@ -233,23 +219,10 @@ create policy "push_subscriptions_delete_own" on push_subscriptions
 -- invites: admins manage invites for their own elders; redemption goes
 -- through the redeem_invite() security-definer function below.
 create policy "invites_select_admin" on invites
-  for select using (
-    exists (
-      select 1 from elder_access
-      where elder_access.elder_id = invites.elder_id
-        and elder_access.user_id = auth.uid()
-        and elder_access.role = 'admin'
-    )
-  );
+  for select using (is_elder_admin(elder_id));
 create policy "invites_insert_admin" on invites
   for insert with check (
-    created_by = auth.uid()
-    and exists (
-      select 1 from elder_access
-      where elder_access.elder_id = invites.elder_id
-        and elder_access.user_id = auth.uid()
-        and elder_access.role = 'admin'
-    )
+    created_by = auth.uid() and is_elder_admin(elder_id)
   );
 
 -- ============================================================
@@ -257,7 +230,7 @@ create policy "invites_insert_admin" on invites
 -- ============================================================
 
 create or replace function public.redeem_invite(invite_token uuid)
-returns table(elder_id uuid) as $$
+returns uuid as $$
 declare
   v_invite invites%rowtype;
 begin
@@ -276,7 +249,7 @@ begin
 
   update invites set used_by = auth.uid() where token = invite_token;
 
-  return query select v_invite.elder_id;
+  return v_invite.elder_id;
 end;
 $$ language plpgsql security definer set search_path = public;
 
@@ -300,20 +273,12 @@ insert into storage.buckets (id, name, public)
 create policy "log_photos_insert_with_access" on storage.objects
   for insert with check (
     bucket_id = 'log-photos'
-    and exists (
-      select 1 from elder_access
-      where elder_access.elder_id = (storage.foldername(name))[1]::uuid
-        and elder_access.user_id = auth.uid()
-    )
+    and has_elder_access((storage.foldername(name))[1]::uuid)
   );
 create policy "log_photos_update_with_access" on storage.objects
   for update using (
     bucket_id = 'log-photos'
-    and exists (
-      select 1 from elder_access
-      where elder_access.elder_id = (storage.foldername(name))[1]::uuid
-        and elder_access.user_id = auth.uid()
-    )
+    and has_elder_access((storage.foldername(name))[1]::uuid)
   );
 
 -- avatars: path is {user_id}.jpg or {user_id}/... — a user may only write
@@ -328,3 +293,12 @@ create policy "avatars_update_own" on storage.objects
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- ============================================================
+-- Realtime
+--
+-- The Today feed subscribes to postgres_changes on logs; the table must be
+-- in the supabase_realtime publication or no events are ever delivered.
+-- ============================================================
+
+alter publication supabase_realtime add table logs;
