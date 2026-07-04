@@ -3,13 +3,13 @@ import type { CardType, Log } from '../types'
 import { fetchLogs, getTodayCount } from '../lib/logs'
 import { useRealtimeLogs } from './useRealtime'
 
-export function useTodayCount(elderId: string | null, cardType: CardType) {
+export function useTodayCount(elderId: string | null, cardType: CardType, excludeLogId?: string) {
   const [count, setCount] = useState(0)
 
   useEffect(() => {
     if (!elderId) return
-    getTodayCount(elderId, cardType).then(setCount)
-  }, [elderId, cardType])
+    getTodayCount(elderId, cardType, excludeLogId).then(setCount)
+  }, [elderId, cardType, excludeLogId])
 
   return count
 }

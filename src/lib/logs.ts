@@ -71,17 +71,27 @@ export async function updateLogField(logId: string, fields: Partial<Log>): Promi
   await supabase.from('logs').update(fields).eq('id', logId)
 }
 
-export async function getTodayCount(elderId: string, cardType: CardType): Promise<number> {
+// excludeLogId lets the confirmation screen count "other logs today" and add
+// its own optimistic entry on top, so the result is stable regardless of
+// whether the background insert has landed yet.
+export async function getTodayCount(
+  elderId: string,
+  cardType: CardType,
+  excludeLogId?: string,
+): Promise<number> {
   const startOfDay = new Date()
   startOfDay.setHours(0, 0, 0, 0)
 
-  const { count } = await supabase
+  let query = supabase
     .from('logs')
     .select('id', { count: 'exact', head: true })
     .eq('elder_id', elderId)
     .eq('card_type', cardType)
     .gte('logged_at', startOfDay.toISOString())
 
+  if (excludeLogId) query = query.neq('id', excludeLogId)
+
+  const { count } = await query
   return count ?? 0
 }
 

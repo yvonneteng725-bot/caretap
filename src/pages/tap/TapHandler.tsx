@@ -31,7 +31,7 @@ export default function TapHandler() {
   const [note, setNote] = useState('')
   const noteDebounce = useRef<ReturnType<typeof setTimeout>>()
 
-  const todayCount = useTodayCount(chosenElderId, cardType ?? 'medications')
+  const todayCount = useTodayCount(chosenElderId, cardType ?? 'medications', log?.id)
 
   const alertMessage = useMemo(() => {
     if (!log) return null
