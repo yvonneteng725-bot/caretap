@@ -1,12 +1,21 @@
-import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
 
 export default function Login() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirect = searchParams.get('redirect') ?? '/today'
+
+  // Password sign-in resolves in place (no email round-trip), so leave the
+  // login page as soon as a session exists. Also covers visiting /login
+  // while already signed in.
+  const session = useAuthStore((s) => s.session)
+  useEffect(() => {
+    if (session) navigate(redirect, { replace: true })
+  }, [session, navigate, redirect])
 
   const signInWithMagicLink = useAuthStore((s) => s.signInWithMagicLink)
   const signInWithPassword = useAuthStore((s) => s.signInWithPassword)
