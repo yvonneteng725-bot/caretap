@@ -166,6 +166,13 @@ create policy "profiles_insert_own" on profiles
 -- elders: user can read elders they have a row in elder_access for
 create policy "elders_select_with_access" on elders
   for select using (has_elder_access(id));
+-- The creator must be able to see the row before their elder_access row
+-- exists: onboarding inserts the elder, reads it back (insert ... returning
+-- runs the select policy on the new row), and only then self-grants admin.
+-- The elder_access_insert_creator_or_admin policy's exists() check on
+-- elders is also evaluated under this select policy.
+create policy "elders_select_creator" on elders
+  for select using (created_by = auth.uid());
 create policy "elders_insert_self" on elders
   for insert with check (created_by = auth.uid());
 create policy "elders_update_admin" on elders

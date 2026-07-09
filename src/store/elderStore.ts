@@ -6,6 +6,14 @@ interface ElderState {
   elders: Elder[]
   selectedElderId: string | null
   loading: boolean
+  // User id the current `elders` were loaded for, null until the first
+  // fetch completes. Consumers that redirect on "no elders" (OnboardingGate)
+  // must wait for this, not just `loading`, because the store mounts with
+  // loading=false before any fetch starts. useElders also uses it to fetch
+  // once per user instead of on every consumer mount — a mount-triggered
+  // fetch flips `loading`, which unmounts the gate's children and would
+  // otherwise remount-and-fetch in an endless cycle.
+  fetchedFor: string | null
   fetchElders: (userId: string) => Promise<void>
   selectElder: (elderId: string) => void
 }
@@ -16,6 +24,7 @@ export const useElderStore = create<ElderState>((set, get) => ({
   elders: [],
   selectedElderId: localStorage.getItem(SELECTED_ELDER_KEY),
   loading: false,
+  fetchedFor: null,
 
   fetchElders: async (userId) => {
     set({ loading: true })
@@ -25,7 +34,7 @@ export const useElderStore = create<ElderState>((set, get) => ({
       .eq('user_id', userId)
 
     if (error || !data) {
-      set({ loading: false })
+      set({ loading: false, fetchedFor: userId })
       return
     }
 
@@ -36,6 +45,7 @@ export const useElderStore = create<ElderState>((set, get) => ({
     set({
       elders,
       loading: false,
+      fetchedFor: userId,
       selectedElderId: stillValid ? currentSelected : (elders[0]?.id ?? null),
     })
   },
