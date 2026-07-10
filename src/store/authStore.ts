@@ -24,6 +24,8 @@ async function fetchProfile(userId: string): Promise<Profile | null> {
   return data as Profile | null
 }
 
+let initStarted = false
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
@@ -32,25 +34,47 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialized: false,
 
   init: async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    if (initStarted) return
+    initStarted = true
 
-    if (session) {
-      const profile = await fetchProfile(session.user.id)
+    const loadProfile = async (userId: string) => {
+      const profile = await fetchProfile(userId)
       if (profile) await i18n.changeLanguage(profile.preferred_language)
-      set({ session, user: session.user, profile, loading: false, initialized: true })
-    } else {
-      set({ session: null, user: null, profile: null, loading: false, initialized: true })
+      set({ profile })
     }
 
-    supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (newSession) {
-        const profile = await fetchProfile(newSession.user.id)
-        if (profile) await i18n.changeLanguage(profile.preferred_language)
-        set({ session: newSession, user: newSession.user, profile })
-      } else {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session) {
+        set({ session, user: session.user })
+        await loadProfile(session.user.id)
+      }
+    } finally {
+      // Always flip initialized, even if session restore throws — otherwise
+      // the app is stuck on the blank pre-init screen forever.
+      set({ loading: false, initialized: true })
+    }
+
+    // This callback must stay synchronous: supabase-js runs it while holding
+    // its auth lock, and awaiting a Supabase query here deadlocks because the
+    // query waits on that same lock to attach the access token. That hang hit
+    // exactly when the app was reopened with an expired token (NFC tap after
+    // hours away), making users appear logged out. Profile loading is
+    // deferred out of the callback instead.
+    supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!newSession) {
         set({ session: null, user: null, profile: null })
+        return
+      }
+      const sameUser = get().user?.id === newSession.user.id
+      set({ session: newSession, user: newSession.user })
+      if (!sameUser || !get().profile) {
+        setTimeout(() => {
+          void loadProfile(newSession.user.id)
+        }, 0)
       }
     })
   },

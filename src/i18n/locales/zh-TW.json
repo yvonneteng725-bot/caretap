@@ -75,7 +75,10 @@
     "step4_title": "邀請家人",
     "role_caregiver": "我是照顧者",
     "role_family": "我是家庭成員",
-    "skip": "略過"
+    "skip": "略過",
+    "error_name_required": "請輸入姓名。",
+    "error_signed_out": "登入已過期，請重新登入。",
+    "error_save_failed": "儲存失敗：{{message}}"
   },
   "history": {
     "export": "匯出給醫生",
