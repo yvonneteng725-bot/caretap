@@ -75,7 +75,10 @@
     "step4_title": "Undang keluarga",
     "role_caregiver": "Saya pengasuh",
     "role_family": "Saya anggota keluarga",
-    "skip": "Lewati"
+    "skip": "Lewati",
+    "error_name_required": "Silakan masukkan nama.",
+    "error_signed_out": "Sesi Anda telah berakhir — silakan masuk lagi.",
+    "error_save_failed": "Gagal menyimpan: {{message}}"
   },
   "history": {
     "export": "Ekspor untuk dokter",

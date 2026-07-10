@@ -27,6 +27,8 @@ export default function Onboarding() {
   const [dob, setDob] = useState('')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [step1Error, setStep1Error] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
   // Step 2
   const [role, setRole] = useState<'caregiver' | 'family'>('caregiver')
@@ -45,33 +47,60 @@ export default function Onboarding() {
 
   const handleStep1 = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user || !name.trim()) return
+    setStep1Error(null)
 
-    const { data: elder, error } = await supabase
-      .from('elders')
-      .insert({ name: name.trim(), date_of_birth: dob || null, created_by: user.id })
-      .select()
-      .single()
-
-    if (error || !elder) return
-
-    await supabase.from('elder_access').insert({ elder_id: elder.id, user_id: user.id, role: 'admin' })
-
-    if (photoFile) {
-      const compressed = await compressPhoto(photoFile, 150)
-      const path = `${user.id}/elder-${elder.id}.jpg`
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
-      if (!uploadError) {
-        const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-        await supabase.from('elders').update({ photo_url: data.publicUrl }).eq('id', elder.id)
-      }
+    if (!user) {
+      setStep1Error(t('onboarding.error_signed_out'))
+      return
+    }
+    if (!name.trim()) {
+      setStep1Error(t('onboarding.error_name_required'))
+      return
     }
 
-    setElderId(elder.id)
-    selectElder(elder.id)
-    setStep(2)
+    setSaving(true)
+    try {
+      // Generate the id client-side instead of `insert().select()`: Postgres
+      // checks the RETURNING row against the elders SELECT policy, which
+      // depends on an elder_access row that doesn't exist yet at this point,
+      // so the returning variant fails RLS.
+      const newElderId = crypto.randomUUID()
+      const { error: elderError } = await supabase
+        .from('elders')
+        .insert({ id: newElderId, name: name.trim(), date_of_birth: dob || null, created_by: user.id })
+      if (elderError) throw elderError
+
+      const { error: accessError } = await supabase
+        .from('elder_access')
+        .insert({ elder_id: newElderId, user_id: user.id, role: 'admin' })
+      if (accessError) throw accessError
+
+      if (photoFile) {
+        try {
+          const compressed = await compressPhoto(photoFile, 150)
+          const path = `${user.id}/elder-${newElderId}.jpg`
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
+          if (!uploadError) {
+            const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+            await supabase.from('elders').update({ photo_url: data.publicUrl }).eq('id', newElderId)
+          }
+        } catch {
+          // The photo is optional — a failed upload shouldn't block onboarding.
+        }
+      }
+
+      setElderId(newElderId)
+      selectElder(newElderId)
+      setStep(2)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : ((err as { message?: string })?.message ?? String(err))
+      setStep1Error(t('onboarding.error_save_failed', { message }))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleStep2 = async () => {
@@ -144,8 +173,18 @@ export default function Onboarding() {
           </label>
           {photoPreview && <img src={photoPreview} alt="" className="mt-2 h-16 w-16 rounded-full object-cover" />}
 
-          <button type="submit" className="mt-auto rounded-full bg-medications-accent py-3 text-sm font-light text-white">
-            {t('common.next')}
+          {step1Error && (
+            <p role="alert" className="mt-4 text-xs font-light text-blood-pressure-dark">
+              {step1Error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="mt-auto rounded-full bg-medications-accent py-3 text-sm font-light text-white disabled:opacity-60"
+          >
+            {saving ? t('common.loading') : t('common.next')}
           </button>
         </form>
       )}

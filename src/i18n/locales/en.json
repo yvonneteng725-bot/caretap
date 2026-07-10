@@ -75,7 +75,10 @@
     "step4_title": "Invite family",
     "role_caregiver": "I'm the caregiver",
     "role_family": "I'm a family member",
-    "skip": "Skip"
+    "skip": "Skip",
+    "error_name_required": "Please enter a name.",
+    "error_signed_out": "Your session has expired — please sign in again.",
+    "error_save_failed": "Couldn't save: {{message}}"
   },
   "history": {
     "export": "Export for doctor",
