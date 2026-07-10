@@ -6,6 +6,7 @@ import { OnboardingGate } from './components/OnboardingGate'
 import { AppLayout } from './components/AppLayout'
 
 import Login from './pages/Login'
+import ResetPassword from './pages/ResetPassword'
 import Join from './pages/Join'
 import Onboarding from './pages/Onboarding'
 import Today from './pages/Today'
@@ -30,6 +31,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/join/:token" element={<Join />} />
 
         <Route element={<ProtectedRoute />}>

@@ -36,6 +36,19 @@ Schedule `medication-check` to run every 30 minutes from the Supabase
 dashboard (Edge Functions → Cron), and set the `VAPID_PUBLIC_KEY`,
 `VAPID_PRIVATE_KEY`, and `VAPID_EMAIL` function secrets.
 
+### Auth redirect URLs (required)
+
+Password-reset emails send users to `/reset-password`, so Supabase must be
+allowed to redirect there. In the Supabase dashboard go to
+**Authentication → URL Configuration → Redirect URLs** and add:
+
+```
+https://caretap.vercel.app/reset-password
+```
+
+(Add your local dev URL too, e.g. `http://localhost:5173/reset-password`,
+if you want to test the reset flow locally.)
+
 ## NFC cards
 
 Program each physical card (via the NFC Tools app) with one of:

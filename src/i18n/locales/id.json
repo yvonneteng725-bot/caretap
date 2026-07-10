@@ -103,17 +103,37 @@
     "title": "CARETAP",
     "subtitle": "Catatan perawatan untuk keluarga Anda",
     "email": "Alamat email",
-    "send_link": "Kirim tautan masuk",
-    "check_email": "Periksa email Anda untuk tautan masuk",
-    "use_password": "Gunakan kata sandi",
     "password": "Kata sandi",
     "sign_in": "Masuk",
-    "join_invite": "Gabung lewat tautan undangan"
+    "create_account": "Buat akun",
+    "no_account": "Baru di sini? Buat akun",
+    "back_to_sign_in": "Kembali ke halaman masuk",
+    "forgot_password": "Lupa kata sandi?",
+    "send_reset_link": "Kirim tautan reset",
+    "reset_email_sent": "Periksa email Anda untuk tautan reset kata sandi.",
+    "confirm_email_sent": "Periksa email Anda untuk konfirmasi akun, lalu masuk.",
+    "join_invite": "Gabung lewat tautan undangan",
+    "error_invalid_credentials": "Email atau kata sandi salah.",
+    "error_email_not_confirmed": "Silakan konfirmasi email Anda dulu — periksa kotak masuk.",
+    "error_user_exists": "Akun dengan email ini sudah ada. Coba masuk.",
+    "error_weak_password": "Kata sandi minimal 6 karakter.",
+    "error_rate_limit": "Terlalu banyak percobaan — tunggu sebentar lalu coba lagi.",
+    "error_invalid_email": "Silakan masukkan alamat email yang valid."
   },
   "elder_selector": {
     "title": "Untuk siapa Anda mencatat?"
   },
   "today_screen": {
     "medications_due": "Waktunya minum obat"
+  },
+  "reset_password": {
+    "title": "Atur kata sandi baru",
+    "new_password": "Kata sandi baru",
+    "confirm_password": "Konfirmasi kata sandi baru",
+    "mismatch": "Kata sandi tidak cocok.",
+    "save": "Perbarui kata sandi",
+    "success": "Kata sandi diperbarui — Anda sudah masuk.",
+    "invalid_link": "Tautan reset ini tidak valid atau sudah kedaluwarsa.",
+    "request_new": "Minta tautan baru"
   }
 }

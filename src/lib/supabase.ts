@@ -11,8 +11,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
+    storageKey: 'caretap-auth',
+    storage: window.localStorage,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storage: window.localStorage,
+    flowType: 'pkce',
   },
 })
