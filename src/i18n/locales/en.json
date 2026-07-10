@@ -103,17 +103,37 @@
     "title": "CARETAP",
     "subtitle": "Care logging for your family",
     "email": "Email address",
-    "send_link": "Send me a login link",
-    "check_email": "Check your email for the login link",
-    "use_password": "Use a password instead",
     "password": "Password",
     "sign_in": "Sign in",
-    "join_invite": "Join via invite link"
+    "create_account": "Create account",
+    "no_account": "New here? Create an account",
+    "back_to_sign_in": "Back to sign in",
+    "forgot_password": "Forgot password?",
+    "send_reset_link": "Send reset link",
+    "reset_email_sent": "Check your email for a link to reset your password.",
+    "confirm_email_sent": "Check your email to confirm your account, then sign in.",
+    "join_invite": "Join via invite link",
+    "error_invalid_credentials": "Incorrect email or password.",
+    "error_email_not_confirmed": "Please confirm your email address first — check your inbox.",
+    "error_user_exists": "An account with this email already exists. Try signing in.",
+    "error_weak_password": "Password must be at least 6 characters.",
+    "error_rate_limit": "Too many attempts — please wait a moment and try again.",
+    "error_invalid_email": "Please enter a valid email address."
   },
   "elder_selector": {
     "title": "Who are you logging for?"
   },
   "today_screen": {
     "medications_due": "Medications may be due"
+  },
+  "reset_password": {
+    "title": "Set a new password",
+    "new_password": "New password",
+    "confirm_password": "Confirm new password",
+    "mismatch": "Passwords don't match.",
+    "save": "Update password",
+    "success": "Password updated — you're signed in.",
+    "invalid_link": "This reset link is invalid or has expired.",
+    "request_new": "Request a new link"
   }
 }

@@ -8,12 +8,14 @@ interface AuthState {
   session: Session | null
   user: User | null
   profile: Profile | null
+  isAuthenticated: boolean
   loading: boolean
   initialized: boolean
   init: () => Promise<void>
-  signInWithMagicLink: (email: string, redirectTo?: string) => Promise<void>
   signInWithPassword: (email: string, password: string) => Promise<void>
-  signUpWithPassword: (email: string, password: string) => Promise<void>
+  signUpWithPassword: (email: string, password: string) => Promise<{ needsEmailConfirmation: boolean }>
+  resetPassword: (email: string) => Promise<void>
+  updatePassword: (password: string) => Promise<void>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
   updateLanguage: (language: Language) => Promise<void>
@@ -30,6 +32,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   profile: null,
+  isAuthenticated: false,
   loading: true,
   initialized: false,
 
@@ -43,13 +46,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ profile })
     }
 
+    // STEP 1: subscribe BEFORE restoring the session so no auth event is
+    // missed. Do NOT await Supabase calls inside this callback — it runs
+    // while supabase-js holds its auth lock, and an awaited query deadlocks
+    // waiting on that same lock (the "logged out after NFC tap" hang).
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        const sameUser = get().user?.id === session.user.id
+        set({ session, user: session.user, isAuthenticated: true })
+        if (!sameUser || !get().profile) void loadProfile(session.user.id)
+      } else {
+        set({ session: null, user: null, profile: null, isAuthenticated: false })
+      }
+      set({ loading: false, initialized: true })
+    })
+
+    // STEP 2: THEN restore any persisted session from localStorage.
     try {
       const {
         data: { session },
       } = await supabase.auth.getSession()
 
       if (session) {
-        set({ session, user: session.user })
+        set({ session, user: session.user, isAuthenticated: true })
         await loadProfile(session.user.id)
       }
     } finally {
@@ -57,32 +76,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // the app is stuck on the blank pre-init screen forever.
       set({ loading: false, initialized: true })
     }
-
-    // This callback must stay synchronous: supabase-js runs it while holding
-    // its auth lock, and awaiting a Supabase query here deadlocks because the
-    // query waits on that same lock to attach the access token. That hang hit
-    // exactly when the app was reopened with an expired token (NFC tap after
-    // hours away), making users appear logged out. Profile loading is
-    // deferred out of the callback instead.
-    supabase.auth.onAuthStateChange((_event, newSession) => {
-      if (!newSession) {
-        set({ session: null, user: null, profile: null })
-        return
-      }
-      const sameUser = get().user?.id === newSession.user.id
-      set({ session: newSession, user: newSession.user })
-      if (!sameUser || !get().profile) {
-        setTimeout(() => {
-          void loadProfile(newSession.user.id)
-        }, 0)
-      }
-    })
-  },
-
-  signInWithMagicLink: async (email, redirectTo) => {
-    const emailRedirectTo = `${import.meta.env.VITE_APP_URL}${redirectTo ?? '/today'}`
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo } })
-    if (error) throw error
   },
 
   signInWithPassword: async (email, password) => {
@@ -91,13 +84,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signUpWithPassword: async (email, password) => {
-    const { error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) throw error
+    // With email confirmation enabled, signUp returns a user but no session
+    // until the address is verified.
+    return { needsEmailConfirmation: !data.session }
+  },
+
+  resetPassword: async (email) => {
+    const appUrl = (import.meta.env.VITE_APP_URL as string | undefined) ?? window.location.origin
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${appUrl}/reset-password`,
+    })
+    if (error) throw error
+  },
+
+  updatePassword: async (password) => {
+    const { error } = await supabase.auth.updateUser({ password })
     if (error) throw error
   },
 
   signOut: async () => {
     await supabase.auth.signOut()
-    set({ session: null, user: null, profile: null })
+    set({ session: null, user: null, profile: null, isAuthenticated: false })
   },
 
   refreshProfile: async () => {
