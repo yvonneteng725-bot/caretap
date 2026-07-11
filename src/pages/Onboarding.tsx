@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase'
 import { saveMedicationSchedule } from '../lib/medicationSchedule'
 import { createInvite } from '../lib/invites'
 import { compressPhoto } from '../lib/compressPhoto'
+import { uploadPhoto } from '../lib/uploadPhoto'
 import { Camera } from 'lucide-react'
 
 const STEPS = 4
@@ -80,13 +81,8 @@ export default function Onboarding() {
         try {
           const compressed = await compressPhoto(photoFile, 150)
           const path = `${user.id}/elder-${newElderId}.jpg`
-          const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
-          if (!uploadError) {
-            const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-            await supabase.from('elders').update({ photo_url: data.publicUrl }).eq('id', newElderId)
-          }
+          const publicUrl = await uploadPhoto('avatars', path, compressed)
+          await supabase.from('elders').update({ photo_url: publicUrl }).eq('id', newElderId)
         } catch {
           // The photo is optional — a failed upload shouldn't block onboarding.
         }

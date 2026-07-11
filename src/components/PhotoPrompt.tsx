@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Camera, Check, RotateCcw } from 'lucide-react'
 import { compressPhoto } from '../lib/compressPhoto'
-import { supabase } from '../lib/supabase'
+import { uploadPhoto } from '../lib/uploadPhoto'
 import { updateLogField } from '../lib/logs'
 import type { CardType } from '../types'
 
@@ -33,13 +33,8 @@ export function PhotoPrompt({ elderId, logId, cardType }: Props) {
     try {
       const compressed = await compressPhoto(file)
       const path = `${elderId}/${cardType}/${logId}.jpg`
-      const { error: uploadError } = await supabase.storage
-        .from('log-photos')
-        .upload(path, compressed, { contentType: 'image/jpeg', upsert: true })
-      if (uploadError) throw uploadError
-
-      const { data } = supabase.storage.from('log-photos').getPublicUrl(path)
-      const saved = await updateLogField(logId, { photo_url: data.publicUrl })
+      const publicUrl = await uploadPhoto('log-photos', path, compressed)
+      const saved = await updateLogField(logId, { photo_url: publicUrl })
       if (!saved) throw new Error('Could not attach the photo to the log entry')
       setStatus('done')
     } catch (err) {

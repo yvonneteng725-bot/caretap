@@ -1,6 +1,6 @@
 // Queues log writes in IndexedDB when the device is offline, and flushes
 // them to Supabase once connectivity returns.
-import { supabase } from './supabase'
+import { insertLog } from './insertLog'
 import type { Log } from '../types'
 
 const DB_NAME = 'caretap-offline'
@@ -72,7 +72,7 @@ export async function flushQueue(): Promise<void> {
   let syncedCount = 0
   for (const entry of queued) {
     const { queueId, ...log } = entry
-    const { error } = await supabase.from('logs').insert(log)
+    const { error } = await insertLog(log)
     if (!error) {
       await removeQueuedLog(queueId)
       syncedCount++

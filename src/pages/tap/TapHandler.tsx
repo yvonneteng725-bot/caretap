@@ -29,6 +29,7 @@ export default function TapHandler() {
   const [chosenElderId, setChosenElderId] = useState<string | null>(null)
   const [log, setLog] = useState<Log | null>(null)
   const [note, setNote] = useState('')
+  const [saveError, setSaveError] = useState<string | null>(null)
   const noteDebounce = useRef<ReturnType<typeof setTimeout>>()
 
   const todayCount = useTodayCount(chosenElderId, cardType ?? 'medications', log?.id)
@@ -57,7 +58,9 @@ export default function TapHandler() {
 
     const optimistic = createOptimisticLog(chosenElderId, user.id, cardType)
     setLog(optimistic)
-    persistLog(optimistic)
+    persistLog(optimistic).then((result) => {
+      if (result.status === 'failed') setSaveError(result.message)
+    })
   }, [chosenElderId, user, cardType, log])
 
   if (!cardType) {
@@ -87,7 +90,9 @@ export default function TapHandler() {
   const handleSaveWithFields = (fields: Partial<Log>) => {
     const optimistic = { ...createOptimisticLog(chosenElderId, user.id, cardType), ...fields }
     setLog(optimistic)
-    persistLog(optimistic)
+    persistLog(optimistic).then((result) => {
+      if (result.status === 'failed') setSaveError(result.message)
+    })
   }
 
   const handleNoteChange = (value: string) => {
@@ -143,6 +148,7 @@ export default function TapHandler() {
       loggedAt={log.logged_at}
       todayCount={todayCount + 1}
       alertMessage={alertMessage}
+      saveErrorMessage={saveError ? t('confirmation.save_failed', { message: saveError }) : null}
       note={note}
       onNoteChange={handleNoteChange}
       photoSlot={
