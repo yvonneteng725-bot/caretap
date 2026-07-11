@@ -21,7 +21,8 @@
     "add_note": "新增備註（選填）",
     "todays_count": "{{cardType}} · 今天已記錄 {{count}} 次",
     "add_photo": "新增照片（選填）",
-    "back_home": "← 返回首頁"
+    "back_home": "← 返回首頁",
+    "photo_failed": "照片儲存失敗：{{message}}"
   },
   "meal_intake": {
     "label": "這餐吃了多少？",
@@ -49,7 +50,9 @@
     "before_meal": "餐前",
     "after_meal": "餐後",
     "fasting": "空腹",
-    "glucose_normal": "正常值：空腹 3.9–6.1 / 餐後 <7.8 mmol/L"
+    "glucose_normal": "正常值：空腹 3.9–6.1 / 餐後 <7.8 mmol/L",
+    "spo2": "血氧 SpO₂（%）",
+    "spo2_normal": "正常：血氧 95–100%"
   },
   "alerts": {
     "bp_high": "血壓偏高",
@@ -59,14 +62,17 @@
     "glucose_high": "血糖偏高",
     "meal_refused": "{{name}} 拒絕進食",
     "medication_due": "用藥時間可能到了",
-    "high_badge": "偏高"
+    "high_badge": "偏高",
+    "spo2_low": "血氧偏低"
   },
   "settings": {
     "language": "顯示語言",
     "invite": "邀請家人",
     "invite_link": "分享此連結：",
     "notifications": "推播通知",
-    "sign_out": "登出"
+    "sign_out": "登出",
+    "invite_failed": "無法建立邀請連結：{{message}}",
+    "invite_hint": "把這個連結分享給家人 — 48 小時內開啟連結的人都能加入並看到相同的照護紀錄。"
   },
   "onboarding": {
     "step1_title": "您在照顧誰？",
@@ -135,5 +141,19 @@
     "success": "密碼已更新，您已登入。",
     "invalid_link": "此重設連結無效或已過期。",
     "request_new": "重新申請連結"
+  },
+  "report": {
+    "title": "照護報告",
+    "period": "最近 {{count}} 天",
+    "adherence": "服藥依從率",
+    "vitals": "生命徵象",
+    "alerts": "重要警示",
+    "col_date": "日期",
+    "col_type": "類型",
+    "col_value": "數值",
+    "col_alert": "警示",
+    "no_vitals": "此期間沒有生命徵象紀錄",
+    "no_alerts": "此期間沒有警示",
+    "generated": "由 CareTap 產生 · {{date}}"
   }
 }

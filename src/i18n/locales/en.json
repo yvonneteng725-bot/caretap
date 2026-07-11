@@ -21,7 +21,8 @@
     "add_note": "Add a note... (optional)",
     "todays_count": "{{cardType}} · {{count}}× today",
     "add_photo": "Add photo (optional)",
-    "back_home": "← Back to home"
+    "back_home": "← Back to home",
+    "photo_failed": "Photo couldn't be saved: {{message}}"
   },
   "meal_intake": {
     "label": "How much did they eat?",
@@ -49,7 +50,9 @@
     "before_meal": "Before meal",
     "after_meal": "After meal",
     "fasting": "Fasting",
-    "glucose_normal": "Normal: 3.9–6.1 fasting / <7.8 after meal"
+    "glucose_normal": "Normal: 3.9–6.1 fasting / <7.8 after meal",
+    "spo2": "Blood oxygen SpO₂ (%)",
+    "spo2_normal": "Normal: SpO₂ 95–100%"
   },
   "alerts": {
     "bp_high": "Blood pressure is elevated",
@@ -59,14 +62,17 @@
     "glucose_high": "Glucose is elevated",
     "meal_refused": "{{name}} refused their meal",
     "medication_due": "Medications may be due",
-    "high_badge": "High"
+    "high_badge": "High",
+    "spo2_low": "Blood oxygen is low"
   },
   "settings": {
     "language": "Display language",
     "invite": "Invite family member",
     "invite_link": "Share this link:",
     "notifications": "Push notifications",
-    "sign_out": "Sign out"
+    "sign_out": "Sign out",
+    "invite_failed": "Couldn't create the invite link: {{message}}",
+    "invite_hint": "Share this link with family — anyone who opens it within 48 hours joins and sees the same care logs."
   },
   "onboarding": {
     "step1_title": "Who are you caring for?",
@@ -135,5 +141,19 @@
     "success": "Password updated — you're signed in.",
     "invalid_link": "This reset link is invalid or has expired.",
     "request_new": "Request a new link"
+  },
+  "report": {
+    "title": "Care Report",
+    "period": "Last {{count}} days",
+    "adherence": "Medication adherence",
+    "vitals": "Vitals",
+    "alerts": "Notable alerts",
+    "col_date": "Date",
+    "col_type": "Type",
+    "col_value": "Value",
+    "col_alert": "Alert",
+    "no_vitals": "No vitals recorded in this period",
+    "no_alerts": "No alerts in this period",
+    "generated": "Generated with CareTap · {{date}}"
   }
 }

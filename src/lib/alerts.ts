@@ -1,7 +1,14 @@
 import { supabase } from './supabase'
 import type { Log } from '../types'
 
-export type AlertKey = 'bp_high' | 'bp_low' | 'temp_high' | 'temp_low' | 'glucose_high' | 'meal_refused'
+export type AlertKey =
+  | 'bp_high'
+  | 'bp_low'
+  | 'spo2_low'
+  | 'temp_high'
+  | 'temp_low'
+  | 'glucose_high'
+  | 'meal_refused'
 
 // Evaluates whether a saved log crosses a clinical threshold that should
 // notify family immediately. Mirrors the same thresholds shown as reference
@@ -10,6 +17,8 @@ export function checkAlert(log: Partial<Log>): AlertKey | null {
   if (log.card_type === 'blood_pressure') {
     const sys = log.bp_systolic ?? null
     const dia = log.bp_diastolic ?? null
+    const spo2 = log.spo2 ?? null
+    if (spo2 !== null && spo2 < 92) return 'spo2_low'
     if (sys !== null && sys < 90) return 'bp_low'
     if ((sys !== null && sys > 140) || (dia !== null && dia > 90)) return 'bp_high'
   }

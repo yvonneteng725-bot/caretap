@@ -23,9 +23,11 @@ import {
 export default function Settings() {
   const { t } = useTranslation()
   const { user, profile, signOut, refreshProfile } = useAuthStore()
-  const { selectedElder, selectedElderId } = useElders()
+  const { selectedElder, selectedElderId, selectedRole } = useElders()
   const fetchElders = useElderStore((s) => s.fetchElders)
-  const isAdmin = profile?.role === 'admin'
+  // Admin-ness lives in elder_access.role (granted to the elder's creator
+  // during onboarding), not in profiles.role, which is just a self-label.
+  const isAdmin = selectedRole === 'admin'
 
   const [displayName, setDisplayName] = useState(profile?.display_name ?? '')
   useEffect(() => setDisplayName(profile?.display_name ?? ''), [profile?.display_name])
@@ -67,6 +69,7 @@ export default function Settings() {
   // Family members (admin only)
   const [members, setMembers] = useState<FamilyMember[]>([])
   const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [inviteError, setInviteError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -75,8 +78,14 @@ export default function Settings() {
 
   const handleInvite = async () => {
     if (!selectedElderId) return
-    const link = await createInvite(selectedElderId, 'family')
-    setInviteLink(link)
+    setInviteError(null)
+    try {
+      const link = await createInvite(selectedElderId, 'family')
+      setInviteLink(link)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setInviteError(t('settings.invite_failed', { message }))
+    }
   }
 
   const handleRemove = async (accessId: string) => {
@@ -211,6 +220,12 @@ export default function Settings() {
             {t('settings.invite')}
           </button>
 
+          {inviteError && (
+            <p role="alert" className="mt-3 text-xs font-light text-blood-pressure-dark">
+              {inviteError}
+            </p>
+          )}
+
           {inviteLink && (
             <div className="mt-3">
               <p className="text-xs font-light text-text-secondary">{t('settings.invite_link')}</p>
@@ -228,6 +243,7 @@ export default function Settings() {
                   )}
                 </button>
               </div>
+              <p className="mt-2 text-xs font-light text-text-muted">{t('settings.invite_hint')}</p>
             </div>
           )}
         </section>

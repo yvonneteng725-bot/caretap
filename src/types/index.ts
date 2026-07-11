@@ -89,6 +89,7 @@ export interface Log {
   bp_systolic: number | null
   bp_diastolic: number | null
   bp_pulse: number | null
+  spo2: number | null
 
   temperature_c: number | null
 

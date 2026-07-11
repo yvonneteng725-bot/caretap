@@ -31,16 +31,24 @@ export async function removeFamilyMember(accessId: string): Promise<void> {
 }
 
 export async function createInvite(elderId: string, role: UserRole = 'family'): Promise<string> {
+  // created_by must be set explicitly — the invites insert RLS policy
+  // requires created_by = auth.uid(), and the column has no default.
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) throw new Error('Not signed in')
+
   const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
   const { data, error } = await supabase
     .from('invites')
-    .insert({ elder_id: elderId, role, expires_at: expiresAt })
+    .insert({ elder_id: elderId, role, expires_at: expiresAt, created_by: session.user.id })
     .select('token')
     .single()
 
   if (error || !data) throw error ?? new Error('Failed to create invite')
 
-  return `${import.meta.env.VITE_APP_URL}/join/${data.token}`
+  const appUrl = (import.meta.env.VITE_APP_URL as string | undefined) ?? window.location.origin
+  return `${appUrl}/join/${data.token}`
 }
 
 export async function redeemInvite(token: string): Promise<{ elder_id: string }> {
