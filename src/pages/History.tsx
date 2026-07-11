@@ -17,7 +17,7 @@ export default function History() {
   const { t, i18n } = useTranslation()
   const { selectedElder, selectedElderId } = useElders()
   const [filter, setFilter] = useState<Filter>('all')
-  const { logs, loading } = useLogFeed(selectedElderId, 30, filter === 'all' ? undefined : filter)
+  const { logs, loading, reload } = useLogFeed(selectedElderId, 30, filter === 'all' ? undefined : filter)
 
   return (
     <div className="min-h-screen bg-bg px-4 pb-10 pt-8">
@@ -52,7 +52,7 @@ export default function History() {
         ) : logs.length === 0 ? (
           <p className="py-10 text-center text-sm font-light text-text-muted">{t('history.no_data')}</p>
         ) : filter === 'all' ? (
-          <TodayFeed logs={logs} />
+          <TodayFeed logs={logs} showDate onChanged={reload} />
         ) : filter === 'blood_pressure' || filter === 'body_temperature' || filter === 'blood_sugar' ? (
           <VitalsChart logs={logs} variant={filter} locale={i18n.language} />
         ) : filter === 'meal_log' ? (

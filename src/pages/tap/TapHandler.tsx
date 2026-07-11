@@ -9,7 +9,7 @@ import { ConfirmationScreen } from '../../components/ConfirmationScreen'
 import { MealSelector } from '../../components/MealSelector'
 import { VitalInput } from '../../components/VitalInput'
 import { PhotoPrompt } from '../../components/PhotoPrompt'
-import { createOptimisticLog, persistLog, updateLogField } from '../../lib/logs'
+import { createOptimisticLog, deleteLog, persistLog, updateLogField } from '../../lib/logs'
 import { checkAlert } from '../../lib/alerts'
 import { CARD_TYPE_SLUGS } from '../../types'
 import type { CardType, Log } from '../../types'
@@ -30,6 +30,7 @@ export default function TapHandler() {
   const [log, setLog] = useState<Log | null>(null)
   const [note, setNote] = useState('')
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [undoing, setUndoing] = useState(false)
   const noteDebounce = useRef<ReturnType<typeof setTimeout>>()
 
   const todayCount = useTodayCount(chosenElderId, cardType ?? 'medications', log?.id)
@@ -53,7 +54,7 @@ export default function TapHandler() {
 
   // Simple card types (medications, wound_care) save instantly — no input step.
   useEffect(() => {
-    if (!chosenElderId || !user || !cardType || log) return
+    if (!chosenElderId || !user || !cardType || log || undoing) return
     if (NEEDS_INPUT.includes(cardType)) return
 
     const optimistic = createOptimisticLog(chosenElderId, user.id, cardType)
@@ -61,7 +62,7 @@ export default function TapHandler() {
     persistLog(optimistic).then((result) => {
       if (result.status === 'failed') setSaveError(result.message)
     })
-  }, [chosenElderId, user, cardType, log])
+  }, [chosenElderId, user, cardType, log, undoing])
 
   if (!cardType) {
     return <div className="p-6 font-light text-text-primary">Unknown card type</div>
@@ -93,6 +94,23 @@ export default function TapHandler() {
     persistLog(optimistic).then((result) => {
       if (result.status === 'failed') setSaveError(result.message)
     })
+  }
+
+  // "Wrong entry" on the confirmation screen: delete the just-saved log.
+  // Input card types return to their input screen for a redo; instant types
+  // (medications, wound_care) go home — re-tapping the card logs again.
+  const handleUndo = async () => {
+    if (!log) return
+    setUndoing(true)
+    await deleteLog(log.id)
+    setLog(null)
+    setSaveError(null)
+    setNote('')
+    if (NEEDS_INPUT.includes(cardType)) {
+      setUndoing(false)
+    } else {
+      navigate('/today')
+    }
   }
 
   const handleNoteChange = (value: string) => {
@@ -149,6 +167,7 @@ export default function TapHandler() {
       todayCount={todayCount + 1}
       alertMessage={alertMessage}
       saveErrorMessage={saveError ? t('confirmation.save_failed', { message: saveError }) : null}
+      onUndo={handleUndo}
       note={note}
       onNoteChange={handleNoteChange}
       photoSlot={

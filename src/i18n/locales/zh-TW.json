@@ -21,7 +21,8 @@
     "add_photo": "新增照片（選填）",
     "back_home": "← 返回首頁",
     "photo_failed": "照片儲存失敗：{{message}}",
-    "save_failed": "此紀錄儲存失敗：{{message}}"
+    "save_failed": "此紀錄儲存失敗：{{message}}",
+    "undo": "記錯了？復原並刪除"
   },
   "meal_intake": {
     "label": "這餐吃了多少？",
@@ -51,7 +52,12 @@
     "fasting": "空腹",
     "glucose_normal": "正常值：空腹 3.9–6.1 / 餐後 <7.8 mmol/L",
     "spo2": "血氧 SpO₂（%）",
-    "spo2_normal": "正常：血氧 95–100%"
+    "spo2_normal": "正常：血氧 95–100%",
+    "scan": "拍照自動讀取血壓機",
+    "scan_reading": "讀取中…",
+    "scan_check": "已從照片讀取數值，儲存前請確認是否正確。",
+    "scan_nothing": "無法從照片辨識數值，請對準螢幕再拍一次。",
+    "scan_failed": "照片讀取失敗：{{message}}"
   },
   "alerts": {
     "bp_high": "血壓偏高",
@@ -153,6 +159,20 @@
     "col_alert": "警示",
     "no_vitals": "此期間沒有生命徵象紀錄",
     "no_alerts": "此期間沒有警示",
-    "generated": "由 CareTap 產生 · {{date}}"
+    "generated": "由 CareTap 產生 · {{date}}",
+    "bp_trend": "血壓趨勢",
+    "temp_trend": "體溫趨勢",
+    "col_sys": "收縮壓 (H)",
+    "col_dia": "舒張壓 (L)",
+    "col_temp": "體溫 °C",
+    "col_glucose": "血糖 mmol/L",
+    "col_note": "備註",
+    "series_sys": "收縮壓",
+    "series_dia": "舒張壓"
+  },
+  "feed": {
+    "delete": "刪除",
+    "confirm_delete": "再按一次確認",
+    "update_failed": "變更儲存失敗，請再試一次。"
   }
 }

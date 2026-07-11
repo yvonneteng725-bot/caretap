@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Camera } from 'lucide-react'
+import { scanBloodPressurePhoto } from '../lib/scanVitals'
 import type { GlucoseTiming } from '../types'
 
 type BPSave = { bp_systolic: number; bp_diastolic: number; bp_pulse: number | null; spo2: number | null }
@@ -41,17 +43,72 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function BloodPressureInput({ onSave }: { onSave: (v: BPSave) => void }) {
   const { t } = useTranslation()
+  const scanInputRef = useRef<HTMLInputElement>(null)
   const [sys, setSys] = useState('')
   const [dia, setDia] = useState('')
   const [pulse, setPulse] = useState('')
   const [spo2, setSpo2] = useState('')
+  const [scanning, setScanning] = useState(false)
+  const [scanNotice, setScanNotice] = useState<string | null>(null)
+  const [scanError, setScanError] = useState<string | null>(null)
 
   const canSave = sys !== '' && dia !== ''
+
+  const handleScanPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setScanning(true)
+    setScanError(null)
+    setScanNotice(null)
+    try {
+      const scanned = await scanBloodPressurePhoto(file)
+      if (scanned.systolic == null && scanned.diastolic == null) {
+        setScanError(t('vitals.scan_nothing'))
+        return
+      }
+      if (scanned.systolic != null) setSys(String(scanned.systolic))
+      if (scanned.diastolic != null) setDia(String(scanned.diastolic))
+      if (scanned.pulse != null) setPulse(String(scanned.pulse))
+      if (scanned.spo2 != null) setSpo2(String(scanned.spo2))
+      setScanNotice(t('vitals.scan_check'))
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setScanError(t('vitals.scan_failed', { message }))
+    } finally {
+      setScanning(false)
+    }
+  }
 
   return (
     <Shell>
       <p className="brand-label text-center text-xs">{t('brand')}</p>
-      <div className="mt-10 flex flex-col gap-6">
+
+      <input
+        ref={scanInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleScanPhoto}
+        className="hidden"
+      />
+      <button
+        type="button"
+        onClick={() => scanInputRef.current?.click()}
+        disabled={scanning}
+        className="mt-6 flex items-center justify-center gap-2 rounded-full border border-divider bg-bg py-3 text-sm font-light text-text-secondary disabled:opacity-60"
+      >
+        <Camera size={16} strokeWidth={1.5} />
+        {scanning ? t('vitals.scan_reading') : t('vitals.scan')}
+      </button>
+      {scanNotice && <p className="mt-2 text-center text-xs font-light text-medications-dark">{scanNotice}</p>}
+      {scanError && (
+        <p role="alert" className="mt-2 text-center text-xs font-light text-blood-pressure-dark">
+          {scanError}
+        </p>
+      )}
+
+      <div className="mt-6 flex flex-col gap-6">
         <label className="block">
           <span className="text-sm font-light text-text-secondary">{t('vitals.bp_sys')}</span>
           <input

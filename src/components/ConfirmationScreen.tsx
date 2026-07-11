@@ -21,6 +21,7 @@ interface Props {
   onNoteChange: (note: string) => void
   photoSlot?: React.ReactNode
   onBackHome: () => void
+  onUndo?: () => void
 }
 
 export function ConfirmationScreen({
@@ -33,6 +34,7 @@ export function ConfirmationScreen({
   onNoteChange,
   photoSlot,
   onBackHome,
+  onUndo,
 }: Props) {
   const { t, i18n } = useTranslation()
   const accent = CARD_ACCENTS[cardType]
@@ -130,6 +132,12 @@ export function ConfirmationScreen({
       >
         {t('confirmation.back_home')}
       </button>
+
+      {onUndo && (
+        <button onClick={onUndo} className="mt-4 text-sm font-light text-text-muted underline">
+          {t('confirmation.undo')}
+        </button>
+      )}
     </div>
   )
 }
