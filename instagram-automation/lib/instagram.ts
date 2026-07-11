@@ -1,6 +1,6 @@
 import { env } from "./env";
 import { GraphApiError, withRetry } from "./retry";
-import type { QuickReply } from "./types";
+import type { QuickReply, UrlButton } from "./types";
 
 /**
  * Instagram Graph API client (Messenger Platform for IG messaging).
@@ -55,17 +55,43 @@ export async function replyToComment(commentId: string, message: string): Promis
   return res.id;
 }
 
-function buildMessagePayload(text: string, quickReplies?: QuickReply[]) {
+export interface MessageOptions {
+  quickReplies?: QuickReply[];
+  /** Rendered via the Messenger "button" template (tappable link buttons). */
+  urlButtons?: UrlButton[];
+}
+
+function buildMessagePayload(text: string, options: MessageOptions = {}) {
+  const { quickReplies, urlButtons } = options;
+
+  const base =
+    urlButtons && urlButtons.length > 0
+      ? {
+          attachment: {
+            type: "template",
+            payload: {
+              template_type: "button",
+              text,
+              buttons: urlButtons.slice(0, 3).map((b) => ({
+                type: "web_url",
+                url: b.url,
+                title: b.title.slice(0, 20),
+              })),
+            },
+          },
+        }
+      : { text };
+
   return quickReplies && quickReplies.length > 0
     ? {
-        text,
+        ...base,
         quick_replies: quickReplies.map((qr) => ({
           content_type: "text",
           title: qr.title.slice(0, 20), // IG quick-reply title limit
           payload: qr.payload,
         })),
       }
-    : { text };
+    : base;
 }
 
 /**
@@ -75,13 +101,13 @@ function buildMessagePayload(text: string, quickReplies?: QuickReply[]) {
 export async function sendPrivateReply(
   commentId: string,
   text: string,
-  quickReplies?: QuickReply[],
+  options?: MessageOptions,
 ): Promise<void> {
   await graphRequest(`/${env.pageId}/messages`, {
     method: "POST",
     body: {
       recipient: { comment_id: commentId },
-      message: buildMessagePayload(text, quickReplies),
+      message: buildMessagePayload(text, options),
     },
   });
 }
@@ -93,13 +119,13 @@ export async function sendPrivateReply(
 export async function sendDirectMessage(
   igScopedUserId: string,
   text: string,
-  quickReplies?: QuickReply[],
+  options?: MessageOptions,
 ): Promise<void> {
   await graphRequest(`/${env.pageId}/messages`, {
     method: "POST",
     body: {
       recipient: { id: igScopedUserId },
-      message: buildMessagePayload(text, quickReplies),
+      message: buildMessagePayload(text, options),
     },
   });
 }

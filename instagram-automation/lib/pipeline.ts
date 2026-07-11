@@ -19,6 +19,27 @@ import type { IncomingComment, IncomingMessage, Rule, Subscriber } from "./types
 const PAYLOAD_FOLLOW_DONE = "FOLLOW_DONE";
 const PAYLOAD_GET_LINK = "GET_LINK";
 
+function dmButton(rule: Rule) {
+  return {
+    title: rule.dmButtonLabel || "Send me the link",
+    payload: `${PAYLOAD_GET_LINK}:${rule.id}`,
+  };
+}
+
+function followButton(rule: Rule) {
+  return {
+    title: rule.followButtonLabel || "I'm following ✅",
+    payload: `${PAYLOAD_FOLLOW_DONE}:${rule.id}`,
+  };
+}
+
+/** Final-link message options: attach a tappable URL button when configured. */
+function linkOptions(rule: Rule) {
+  return rule.linkUrl
+    ? { urlButtons: [{ title: rule.linkButtonLabel || "Open link 🔗", url: rule.linkUrl }] }
+    : undefined;
+}
+
 function parsePayload(payload: string): { action: string; ruleId: string } | null {
   const sep = payload.indexOf(":");
   if (sep === -1) return null;
@@ -104,9 +125,9 @@ export async function handleComment(comment: IncomingComment): Promise<void> {
 /** No follow gate: opening DM with a quick-reply button leading to the link. */
 async function sendOpeningDm(comment: IncomingComment, rule: Rule): Promise<void> {
   if (rule.dmMessage) {
-    await sendPrivateReply(comment.commentId, rule.dmMessage, [
-      { title: "Send it! 🔗", payload: `${PAYLOAD_GET_LINK}:${rule.id}` },
-    ]);
+    await sendPrivateReply(comment.commentId, rule.dmMessage, {
+      quickReplies: [dmButton(rule)],
+    });
     await logEvent({
       type: "private_reply_sent",
       igUserId: comment.commenterId,
@@ -119,7 +140,7 @@ async function sendOpeningDm(comment: IncomingComment, rule: Rule): Promise<void
     await persist(comment, rule, "new");
   } else {
     // No opening message configured — deliver the link straight away.
-    await sendPrivateReply(comment.commentId, rule.linkMessage);
+    await sendPrivateReply(comment.commentId, rule.linkMessage, linkOptions(rule));
     await logEvent({
       type: "private_reply_sent",
       igUserId: comment.commenterId,
@@ -147,7 +168,7 @@ async function runFollowGate(comment: IncomingComment, rule: Rule): Promise<void
   });
 
   if (following === true) {
-    await sendPrivateReply(comment.commentId, rule.linkMessage);
+    await sendPrivateReply(comment.commentId, rule.linkMessage, linkOptions(rule));
     await logEvent({
       type: "private_reply_sent",
       igUserId: comment.commenterId,
@@ -162,9 +183,9 @@ async function runFollowGate(comment: IncomingComment, rule: Rule): Promise<void
     const prompt =
       rule.followPrompt ||
       "Almost there! Follow us first, then tap the button below and I'll send it right over. 🙌";
-    await sendPrivateReply(comment.commentId, prompt, [
-      { title: "I'm following ✅", payload: `${PAYLOAD_FOLLOW_DONE}:${rule.id}` },
-    ]);
+    await sendPrivateReply(comment.commentId, prompt, {
+      quickReplies: [followButton(rule)],
+    });
     await logEvent({
       type: "private_reply_sent",
       igUserId: comment.commenterId,
@@ -248,7 +269,7 @@ export async function handleMessage(message: IncomingMessage): Promise<void> {
     });
 
     if (following === true) {
-      await sendDirectMessage(message.senderId, rule.linkMessage);
+      await sendDirectMessage(message.senderId, rule.linkMessage, linkOptions(rule));
       await logEvent({
         type: "dm_sent",
         igUserId: message.senderId,
@@ -260,9 +281,9 @@ export async function handleMessage(message: IncomingMessage): Promise<void> {
       const prompt =
         rule.followPrompt ||
         "Hmm, I can't see the follow yet — make sure you're following, then tap again!";
-      await sendDirectMessage(message.senderId, prompt, [
-        { title: "I'm following ✅", payload: `${PAYLOAD_FOLLOW_DONE}:${rule.id}` },
-      ]);
+      await sendDirectMessage(message.senderId, prompt, {
+        quickReplies: [followButton(rule)],
+      });
       await logEvent({
         type: "dm_sent",
         igUserId: message.senderId,
@@ -275,7 +296,7 @@ export async function handleMessage(message: IncomingMessage): Promise<void> {
 
   if (effectiveStage === "link_sent") {
     // They already got it — resend rather than leaving them hanging.
-    await sendDirectMessage(message.senderId, rule.linkMessage);
+    await sendDirectMessage(message.senderId, rule.linkMessage, linkOptions(rule));
     await logEvent({
       type: "dm_sent",
       igUserId: message.senderId,
@@ -286,7 +307,7 @@ export async function handleMessage(message: IncomingMessage): Promise<void> {
   }
 
   // stage "new" (or GET_LINK tap): deliver the link.
-  await sendDirectMessage(message.senderId, rule.linkMessage);
+  await sendDirectMessage(message.senderId, rule.linkMessage, linkOptions(rule));
   await logEvent({
     type: "dm_sent",
     igUserId: message.senderId,

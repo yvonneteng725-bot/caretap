@@ -16,6 +16,14 @@ export interface Rule {
   followPrompt: string;
   /** Final DM containing the link / deliverable. */
   linkMessage: string;
+  /** Optional URL rendered as a tappable button under the final DM. */
+  linkUrl: string;
+  /** Label of the link button (default "Open link 🔗"). */
+  linkButtonLabel: string;
+  /** Label of the quick-reply button under the opening DM (default "Send me the link"). */
+  dmButtonLabel: string;
+  /** Label of the quick-reply button under the follow prompt (default "I'm following ✅"). */
+  followButtonLabel: string;
   /** Rules with enabled != TRUE are ignored. */
   enabled: boolean;
   /** 1-based row number in the sheet (for debugging/log messages). */
@@ -84,4 +92,10 @@ export interface IncomingMessage {
 export interface QuickReply {
   title: string;
   payload: string;
+}
+
+/** A tappable web-link button (Messenger button template). */
+export interface UrlButton {
+  title: string;
+  url: string;
 }

@@ -26,6 +26,10 @@ export const RULES_COLUMNS = {
   requireFollow: "require_follow",
   followPrompt: "follow_prompt",
   linkMessage: "link_message",
+  linkUrl: "link_url",
+  linkButtonLabel: "link_button_label",
+  dmButtonLabel: "dm_button_label",
+  followButtonLabel: "follow_button_label",
   enabled: "enabled",
 } as const;
 
@@ -154,6 +158,10 @@ function parseRules(values: string[][]): Rule[] {
       requireFollow: isTruthyCell(cell(row, idx, RULES_COLUMNS.requireFollow)),
       followPrompt: cell(row, idx, RULES_COLUMNS.followPrompt),
       linkMessage: cell(row, idx, RULES_COLUMNS.linkMessage),
+      linkUrl: cell(row, idx, RULES_COLUMNS.linkUrl),
+      linkButtonLabel: cell(row, idx, RULES_COLUMNS.linkButtonLabel),
+      dmButtonLabel: cell(row, idx, RULES_COLUMNS.dmButtonLabel),
+      followButtonLabel: cell(row, idx, RULES_COLUMNS.followButtonLabel),
       enabled: isTruthyCell(cell(row, idx, RULES_COLUMNS.enabled) || "true"),
       rowNumber: i + 1,
     });

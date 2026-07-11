@@ -4,6 +4,11 @@ Self-hosted replacement for ManyChat's comment-to-DM flows. Next.js (App
 Router, TypeScript) on Vercel's free tier, with a Google Sheet as the
 database via a service account. **No paid services anywhere in the stack.**
 
+Each row in the `Rules` sheet is the equivalent of one ManyChat automation:
+pick a post (or all posts), trigger keywords, public comment replies, an
+opening DM with a button, an optional follow gate, and the final link DM —
+so setting up a new reel is just adding a row to the sheet.
+
 ## How it works
 
 1. Someone comments a trigger keyword on one of your posts.
@@ -42,8 +47,15 @@ existing sheet before going live).
 | `dm_message`      | `Hey! Want the guide? Tap below 👇`             | opening DM; leave blank to skip straight to the link |
 | `require_follow`  | `TRUE`                                         | `TRUE`/`FALSE`                           |
 | `follow_prompt`   | `Follow us first, then tap the button!`        | used when `require_follow` and not following |
-| `link_message`    | `Here you go: https://example.com/guide`       | the final DM with the deliverable        |
+| `link_message`    | `Here's the guide 👇`                           | the final DM with the deliverable        |
+| `link_url`        | `https://example.com/guide`                    | optional; rendered as a tappable button under the final DM |
+| `link_button_label` | `3 things to do!`                            | optional; button text (default `Open link 🔗`) |
+| `dm_button_label` | `Send me the link`                             | optional; quick-reply button under the opening DM |
+| `follow_button_label` | `I'm following ✅`                          | optional; quick-reply button under the follow prompt |
 | `enabled`         | `TRUE`                                         | blank counts as enabled                  |
+
+If you'd rather put the link directly in `link_message` text, leave
+`link_url` blank — both work.
 
 ### `Subscribers` tab (managed by the app — just create the headers)
 
@@ -91,14 +103,12 @@ existing sheet before going live).
 
 1. Push this repo to GitHub.
 2. In [vercel.com](https://vercel.com/) → **Add New Project** → import the
-   repo.
-3. **Set "Root Directory" to `instagram-automation/`** (this app lives in a
-   subdirectory). Framework preset: Next.js.
-4. Add every variable from `.env.example` under Project → Settings →
+   repo. Framework preset: Next.js (auto-detected).
+3. Add every variable from `.env.example` under Project → Settings →
    Environment Variables. For `VERIFY_TOKEN`, invent any random string
    (e.g. `openssl rand -hex 16`) — you'll enter the same string in the Meta
    dashboard next.
-5. Deploy. Your webhook URL is:
+4. Deploy. Your webhook URL is:
    `https://<your-project>.vercel.app/api/webhook`
 
 ### 4. Register the webhook with Meta
@@ -125,7 +135,6 @@ existing sheet before going live).
 ## Local development
 
 ```bash
-cd instagram-automation
 npm install
 cp .env.example .env.local   # fill in values
 npm run dev
