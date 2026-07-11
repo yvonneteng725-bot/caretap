@@ -15,14 +15,13 @@
     "meal_log": "Meal Log"
   },
   "confirmation": {
-    "logged_en": "Logged",
-    "logged_zh": "已記錄",
-    "logged_id": "Berhasil dicatat",
+    "logged": "Logged",
     "add_note": "Add a note... (optional)",
     "todays_count": "{{cardType}} · {{count}}× today",
     "add_photo": "Add photo (optional)",
     "back_home": "← Back to home",
-    "photo_failed": "Photo couldn't be saved: {{message}}"
+    "photo_failed": "Photo couldn't be saved: {{message}}",
+    "save_failed": "This entry couldn't be saved: {{message}}"
   },
   "meal_intake": {
     "label": "How much did they eat?",

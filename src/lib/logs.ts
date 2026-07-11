@@ -1,5 +1,6 @@
-import { supabase } from './supabase'
 import { enqueueLog } from './offlineQueue'
+import { insertLog } from './insertLog'
+import { supabase } from './supabase'
 import { checkAlert, sendAlert } from './alerts'
 import type { CardType, Log } from '../types'
 
@@ -50,23 +51,40 @@ export function createOptimisticLog(
   }
 }
 
-export async function persistLog(log: Log): Promise<void> {
+export type PersistResult =
+  | { status: 'saved' }
+  | { status: 'queued' }
+  | { status: 'failed'; message: string }
+
+function isNetworkError(message: string): boolean {
+  const m = message.toLowerCase()
+  return m.includes('failed to fetch') || m.includes('network') || m.includes('load failed')
+}
+
+export async function persistLog(log: Log): Promise<PersistResult> {
   const { id, ...rest } = log
   const payload = { id, ...rest }
 
   if (!navigator.onLine) {
     await enqueueLog({ ...payload, queueId: id })
-    return
+    return { status: 'queued' }
   }
 
-  const { error } = await supabase.from('logs').insert(payload)
+  const { error } = await insertLog(payload)
   if (error) {
-    await enqueueLog({ ...payload, queueId: id })
-    return
+    // Only connectivity problems belong in the offline queue — a permanent
+    // rejection (RLS, bad data) would just fail again forever while the UI
+    // pretends everything saved. Surface those instead.
+    if (isNetworkError(error.message)) {
+      await enqueueLog({ ...payload, queueId: id })
+      return { status: 'queued' }
+    }
+    return { status: 'failed', message: error.message }
   }
 
   const alertKey = checkAlert(log)
   if (alertKey) sendAlert(log.elder_id, log.id, alertKey)
+  return { status: 'saved' }
 }
 
 // The log row is inserted optimistically in the background, so an update

@@ -25,12 +25,18 @@ Apply the database schema and RLS policies:
 supabase db push        # or run supabase/migrations/001_initial.sql manually
 ```
 
-Deploy the two Edge Functions (used for push alerts):
+Deploy the Edge Functions (push alerts + the photo-upload fallback):
 
 ```bash
 supabase functions deploy send-alert
 supabase functions deploy medication-check
+supabase functions deploy upload-photo
 ```
+
+`upload-photo` matters even if you skip push notifications: it is the
+fallback path for saving log photos and profile pictures when the storage
+RLS policies couldn't be created by migrations (see "Storage buckets &
+policies" below).
 
 Schedule `medication-check` to run every 30 minutes from the Supabase
 dashboard (Edge Functions → Cron), and set the `VAPID_PUBLIC_KEY`,

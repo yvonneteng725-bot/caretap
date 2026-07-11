@@ -15,14 +15,13 @@
     "meal_log": "Catatan Makan"
   },
   "confirmation": {
-    "logged_en": "Logged",
-    "logged_zh": "已記錄",
-    "logged_id": "Berhasil dicatat",
+    "logged": "Berhasil dicatat",
     "add_note": "Tambah catatan (opsional)",
     "todays_count": "{{cardType}} · {{count}}× hari ini",
     "add_photo": "Tambah foto (opsional)",
     "back_home": "← Kembali ke beranda",
-    "photo_failed": "Foto gagal disimpan: {{message}}"
+    "photo_failed": "Foto gagal disimpan: {{message}}",
+    "save_failed": "Catatan ini gagal disimpan: {{message}}"
   },
   "meal_intake": {
     "label": "Berapa banyak yang dimakan?",

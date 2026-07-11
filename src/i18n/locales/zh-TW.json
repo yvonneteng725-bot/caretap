@@ -15,14 +15,13 @@
     "meal_log": "用餐紀錄"
   },
   "confirmation": {
-    "logged_en": "Logged",
-    "logged_zh": "已記錄",
-    "logged_id": "Berhasil dicatat",
+    "logged": "已記錄",
     "add_note": "新增備註（選填）",
     "todays_count": "{{cardType}} · 今天已記錄 {{count}} 次",
     "add_photo": "新增照片（選填）",
     "back_home": "← 返回首頁",
-    "photo_failed": "照片儲存失敗：{{message}}"
+    "photo_failed": "照片儲存失敗：{{message}}",
+    "save_failed": "此紀錄儲存失敗：{{message}}"
   },
   "meal_intake": {
     "label": "這餐吃了多少？",

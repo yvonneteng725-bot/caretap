@@ -16,6 +16,7 @@ interface Props {
   loggedAt: string
   todayCount: number
   alertMessage?: string | null
+  saveErrorMessage?: string | null
   note: string
   onNoteChange: (note: string) => void
   photoSlot?: React.ReactNode
@@ -27,6 +28,7 @@ export function ConfirmationScreen({
   loggedAt,
   todayCount,
   alertMessage,
+  saveErrorMessage,
   note,
   onNoteChange,
   photoSlot,
@@ -50,20 +52,49 @@ export function ConfirmationScreen({
     >
       <p className="brand-label text-xs">{t('brand')}</p>
 
-      <div className="mt-10" style={{ transform: 'scale(1.6)' }}>
+      <div className="ct-pop mt-10" style={{ transform: 'scale(1.6)' }}>
         <Icon color={accent.accent} />
       </div>
 
-      <div className="mt-10 space-y-1.5 text-center" style={{ color: accent.dark }}>
-        <p className="text-lg font-light">✓ {t('confirmation.logged_en')}</p>
-        <p className="text-lg font-light">✓ {t('confirmation.logged_zh')}</p>
-        <p className="text-lg font-light">✓ {t('confirmation.logged_id')}</p>
+      <div className="ct-rise mt-10 flex items-center gap-3" style={{ animationDelay: '0.25s' }}>
+        <span
+          className="flex h-10 w-10 items-center justify-center rounded-full"
+          style={{ backgroundColor: accent.dark }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              className="ct-tick"
+              d="M4.5 12.5l5 5L19.5 7"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <p className="text-2xl font-light" style={{ color: accent.dark }}>
+          {t('confirmation.logged')}
+        </p>
       </div>
 
-      <p className="mt-8 text-4xl font-light text-text-primary" style={{ fontSize: '2.5rem' }}>
+      <p
+        className="ct-rise mt-8 text-4xl font-light text-text-primary"
+        style={{ fontSize: '2.5rem', animationDelay: '0.4s' }}
+      >
         {timeStr}
       </p>
-      <p className="mt-1 text-base font-light text-text-secondary">{dateStr}</p>
+      <p className="ct-rise mt-1 text-base font-light text-text-secondary" style={{ animationDelay: '0.5s' }}>
+        {dateStr}
+      </p>
+
+      {saveErrorMessage && (
+        <p
+          role="alert"
+          className="mt-4 w-full max-w-sm rounded-card bg-blood-pressure-accent/15 px-4 py-3 text-center text-sm font-light text-blood-pressure-dark"
+        >
+          {saveErrorMessage}
+        </p>
+      )}
 
       {alertMessage && (
         <div className="mt-4 w-full max-w-sm">

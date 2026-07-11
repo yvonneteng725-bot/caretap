@@ -52,4 +52,56 @@
       opacity: 1;
     }
   }
+
+  /* Confirmation screen: icon pops in, tick draws itself, text rises in. */
+  .ct-pop {
+    animation: ctPop 0.55s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+  }
+
+  .ct-rise {
+    animation: ctRise 0.5s ease-out both;
+  }
+
+  .ct-tick {
+    stroke-dasharray: 26;
+    stroke-dashoffset: 26;
+    animation: ctDraw 0.35s ease-out 0.45s forwards;
+  }
+
+  @keyframes ctPop {
+    0% {
+      transform: scale(0.4);
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes ctRise {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes ctDraw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ct-pop,
+    .ct-rise,
+    .ct-tick {
+      animation: none;
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
+  }
 }
