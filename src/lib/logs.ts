@@ -10,6 +10,7 @@ export type NewLogInput = Partial<
     | 'bp_systolic'
     | 'bp_diastolic'
     | 'bp_pulse'
+    | 'spo2'
     | 'temperature_c'
     | 'glucose_mmol'
     | 'glucose_timing'
@@ -38,6 +39,7 @@ export function createOptimisticLog(
     bp_systolic: input.bp_systolic ?? null,
     bp_diastolic: input.bp_diastolic ?? null,
     bp_pulse: input.bp_pulse ?? null,
+    spo2: input.spo2 ?? null,
     temperature_c: input.temperature_c ?? null,
     glucose_mmol: input.glucose_mmol ?? null,
     glucose_timing: input.glucose_timing ?? null,
@@ -67,8 +69,21 @@ export async function persistLog(log: Log): Promise<void> {
   if (alertKey) sendAlert(log.elder_id, log.id, alertKey)
 }
 
-export async function updateLogField(logId: string, fields: Partial<Log>): Promise<void> {
-  await supabase.from('logs').update(fields).eq('id', logId)
+// The log row is inserted optimistically in the background, so an update
+// (photo_url, note) can arrive before the insert has landed — a plain UPDATE
+// would match zero rows and the field would be lost silently. Retry until
+// the row exists. Returns true once the update actually hit a row.
+export async function updateLogField(
+  logId: string,
+  fields: Partial<Log>,
+  attempts = 5,
+): Promise<boolean> {
+  for (let i = 0; i < attempts; i++) {
+    const { data, error } = await supabase.from('logs').update(fields).eq('id', logId).select('id')
+    if (!error && data && data.length > 0) return true
+    if (i < attempts - 1) await new Promise((r) => setTimeout(r, 1000))
+  }
+  return false
 }
 
 // excludeLogId lets the confirmation screen count "other logs today" and add

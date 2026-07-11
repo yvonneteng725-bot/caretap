@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { GlucoseTiming } from '../types'
 
-type BPSave = { bp_systolic: number; bp_diastolic: number; bp_pulse: number | null }
+type BPSave = { bp_systolic: number; bp_diastolic: number; bp_pulse: number | null; spo2: number | null }
 type TempSave = { temperature_c: number }
 type GlucoseSave = { glucose_mmol: number; glucose_timing: GlucoseTiming }
 
@@ -44,6 +44,7 @@ function BloodPressureInput({ onSave }: { onSave: (v: BPSave) => void }) {
   const [sys, setSys] = useState('')
   const [dia, setDia] = useState('')
   const [pulse, setPulse] = useState('')
+  const [spo2, setSpo2] = useState('')
 
   const canSave = sys !== '' && dia !== ''
 
@@ -81,9 +82,22 @@ function BloodPressureInput({ onSave }: { onSave: (v: BPSave) => void }) {
             className="mt-2 w-full rounded-full border border-divider bg-bg px-5 py-4 text-3xl font-light outline-none"
           />
         </label>
+        <label className="block">
+          <span className="text-sm font-light text-text-secondary">
+            {t('vitals.spo2')} ({t('common.optional')})
+          </span>
+          <input
+            inputMode="numeric"
+            value={spo2}
+            onChange={(e) => setSpo2(e.target.value.replace(/\D/g, '').slice(0, 3))}
+            placeholder="98"
+            className="mt-2 w-full rounded-full border border-divider bg-bg px-5 py-4 text-3xl font-light outline-none"
+          />
+        </label>
       </div>
 
       <p className="mt-4 text-xs font-light text-text-muted">{t('vitals.normal_range')}</p>
+      <p className="mt-1 text-xs font-light text-text-muted">{t('vitals.spo2_normal')}</p>
 
       <button
         disabled={!canSave}
@@ -92,6 +106,7 @@ function BloodPressureInput({ onSave }: { onSave: (v: BPSave) => void }) {
             bp_systolic: Number(sys),
             bp_diastolic: Number(dia),
             bp_pulse: pulse ? Number(pulse) : null,
+            spo2: spo2 ? Number(spo2) : null,
           })
         }
         className="mt-8 rounded-full py-4 text-sm font-light text-white disabled:opacity-40"

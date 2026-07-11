@@ -24,9 +24,11 @@ export function PhotoPrompt({ elderId, logId, cardType }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [errorDetail, setErrorDetail] = useState<string | null>(null)
 
   const upload = async (file: File) => {
     setStatus('uploading')
+    setErrorDetail(null)
     setPreviewUrl(URL.createObjectURL(file))
     try {
       const compressed = await compressPhoto(file)
@@ -37,9 +39,11 @@ export function PhotoPrompt({ elderId, logId, cardType }: Props) {
       if (uploadError) throw uploadError
 
       const { data } = supabase.storage.from('log-photos').getPublicUrl(path)
-      await updateLogField(logId, { photo_url: data.publicUrl })
+      const saved = await updateLogField(logId, { photo_url: data.publicUrl })
+      if (!saved) throw new Error('Could not attach the photo to the log entry')
       setStatus('done')
-    } catch {
+    } catch (err) {
+      setErrorDetail(err instanceof Error ? err.message : String(err))
       setStatus('error')
     }
   }
@@ -65,13 +69,18 @@ export function PhotoPrompt({ elderId, logId, cardType }: Props) {
           <Check size={16} className="text-medications-accent" strokeWidth={2} />
         </div>
       ) : status === 'error' ? (
-        <button
-          onClick={() => inputRef.current?.click()}
-          className="flex w-full items-center justify-center gap-2 rounded-full bg-surface py-3 text-sm font-light text-text-secondary"
-        >
-          <RotateCcw size={16} strokeWidth={1.5} />
-          {t('common.retry')}
-        </button>
+        <div>
+          <button
+            onClick={() => inputRef.current?.click()}
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-surface py-3 text-sm font-light text-text-secondary"
+          >
+            <RotateCcw size={16} strokeWidth={1.5} />
+            {t('common.retry')}
+          </button>
+          <p role="alert" className="mt-2 text-center text-xs font-light text-blood-pressure-dark">
+            {t('confirmation.photo_failed', { message: errorDetail ?? '' })}
+          </p>
+        </div>
       ) : (
         <button
           onClick={() => inputRef.current?.click()}

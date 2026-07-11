@@ -15,13 +15,14 @@ import webpush from 'npm:web-push@3'
 interface AlertPayload {
   elderId: string
   logId: string
-  alertKey: 'bp_high' | 'bp_low' | 'temp_high' | 'temp_low' | 'glucose_high' | 'meal_refused'
+  alertKey: 'bp_high' | 'bp_low' | 'spo2_low' | 'temp_high' | 'temp_low' | 'glucose_high' | 'meal_refused'
 }
 
 const MESSAGES: Record<string, Record<AlertPayload['alertKey'], string>> = {
   en: {
     bp_high: 'Blood pressure is elevated',
     bp_low: 'Blood pressure is low',
+    spo2_low: 'Blood oxygen is low',
     temp_high: 'Temperature is above normal',
     temp_low: 'Temperature is below normal',
     glucose_high: 'Glucose is elevated',
@@ -30,6 +31,7 @@ const MESSAGES: Record<string, Record<AlertPayload['alertKey'], string>> = {
   'zh-TW': {
     bp_high: '血壓偏高',
     bp_low: '血壓偏低',
+    spo2_low: '血氧偏低',
     temp_high: '體溫偏高',
     temp_low: '體溫偏低',
     glucose_high: '血糖偏高',
@@ -38,6 +40,7 @@ const MESSAGES: Record<string, Record<AlertPayload['alertKey'], string>> = {
   id: {
     bp_high: 'Tekanan darah tinggi',
     bp_low: 'Tekanan darah rendah',
+    spo2_low: 'Saturasi oksigen rendah',
     temp_high: 'Suhu di atas normal',
     temp_low: 'Suhu di bawah normal',
     glucose_high: 'Gula darah tinggi',

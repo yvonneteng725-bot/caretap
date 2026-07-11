@@ -38,6 +38,7 @@ export default function Onboarding() {
 
   // Step 4
   const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const [inviteError, setInviteError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
   const finish = async () => {
@@ -117,8 +118,14 @@ export default function Onboarding() {
 
   const handleInvite = async () => {
     if (!elderId) return
-    const link = await createInvite(elderId, 'family')
-    setInviteLink(link)
+    setInviteError(null)
+    try {
+      const link = await createInvite(elderId, 'family')
+      setInviteLink(link)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setInviteError(t('settings.invite_failed', { message }))
+    }
   }
 
   return (
@@ -236,20 +243,23 @@ export default function Onboarding() {
           <h1 className="text-lg font-light text-text-primary">{t('onboarding.step4_title')}</h1>
 
           {inviteLink ? (
-            <div className="mt-6 flex items-center gap-2 rounded-full bg-bg px-4 py-3">
-              <span className="flex-1 truncate text-xs font-light text-text-primary">{inviteLink}</span>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(inviteLink)
-                  setCopied(true)
-                  setTimeout(() => setCopied(false), 2000)
-                }}
-              >
-                {copied ? <Check size={15} className="text-medications-accent" /> : (
-                  <span className="text-xs font-light text-text-secondary">{t('common.copy')}</span>
-                )}
-              </button>
-            </div>
+            <>
+              <div className="mt-6 flex items-center gap-2 rounded-full bg-bg px-4 py-3">
+                <span className="flex-1 truncate text-xs font-light text-text-primary">{inviteLink}</span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteLink)
+                    setCopied(true)
+                    setTimeout(() => setCopied(false), 2000)
+                  }}
+                >
+                  {copied ? <Check size={15} className="text-medications-accent" /> : (
+                    <span className="text-xs font-light text-text-secondary">{t('common.copy')}</span>
+                  )}
+                </button>
+              </div>
+              <p className="mt-2 text-xs font-light text-text-muted">{t('settings.invite_hint')}</p>
+            </>
           ) : (
             <button
               onClick={handleInvite}
@@ -257,6 +267,12 @@ export default function Onboarding() {
             >
               {t('settings.invite')}
             </button>
+          )}
+
+          {inviteError && (
+            <p role="alert" className="mt-3 text-xs font-light text-blood-pressure-dark">
+              {inviteError}
+            </p>
           )}
 
           <button onClick={finish} className="mt-auto rounded-full bg-medications-dark py-3 text-sm font-light text-white">

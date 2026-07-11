@@ -49,6 +49,17 @@ https://caretap.vercel.app/reset-password
 (Add your local dev URL too, e.g. `http://localhost:5173/reset-password`,
 if you want to test the reset flow locally.)
 
+### Storage buckets & policies (photo uploads)
+
+Log photos and avatars need the `log-photos` and `avatars` buckets plus
+their RLS policies (created in `001_initial.sql`). On some hosted Supabase
+projects, `supabase db push` cannot create policies on `storage.objects`
+("must be owner of table objects"). If photo uploads fail with a
+row-level-security error (the app now shows the exact message under the
+photo button), recreate the four storage policies from the bottom of
+`supabase/migrations/001_initial.sql` via **Dashboard → Storage →
+Policies**, and confirm both buckets exist and are public.
+
 ## NFC cards
 
 Program each physical card (via the NFC Tools app) with one of:

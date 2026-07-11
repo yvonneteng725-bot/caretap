@@ -21,7 +21,8 @@
     "add_note": "Tambah catatan (opsional)",
     "todays_count": "{{cardType}} · {{count}}× hari ini",
     "add_photo": "Tambah foto (opsional)",
-    "back_home": "← Kembali ke beranda"
+    "back_home": "← Kembali ke beranda",
+    "photo_failed": "Foto gagal disimpan: {{message}}"
   },
   "meal_intake": {
     "label": "Berapa banyak yang dimakan?",
@@ -49,7 +50,9 @@
     "before_meal": "Sebelum makan",
     "after_meal": "Setelah makan",
     "fasting": "Puasa",
-    "glucose_normal": "Normal: puasa 3,9–6,1 / setelah makan <7,8 mmol/L"
+    "glucose_normal": "Normal: puasa 3,9–6,1 / setelah makan <7,8 mmol/L",
+    "spo2": "Saturasi oksigen SpO₂ (%)",
+    "spo2_normal": "Normal: SpO₂ 95–100%"
   },
   "alerts": {
     "bp_high": "Tekanan darah tinggi",
@@ -59,14 +62,17 @@
     "glucose_high": "Gula darah tinggi",
     "meal_refused": "{{name}} menolak makan",
     "medication_due": "Waktunya minum obat",
-    "high_badge": "Tinggi"
+    "high_badge": "Tinggi",
+    "spo2_low": "Saturasi oksigen rendah"
   },
   "settings": {
     "language": "Bahasa tampilan",
     "invite": "Undang anggota keluarga",
     "invite_link": "Bagikan tautan ini:",
     "notifications": "Notifikasi push",
-    "sign_out": "Keluar"
+    "sign_out": "Keluar",
+    "invite_failed": "Gagal membuat tautan undangan: {{message}}",
+    "invite_hint": "Bagikan tautan ini ke keluarga — siapa pun yang membukanya dalam 48 jam akan bergabung dan melihat catatan perawatan yang sama."
   },
   "onboarding": {
     "step1_title": "Siapa yang Anda rawat?",
@@ -135,5 +141,19 @@
     "success": "Kata sandi diperbarui — Anda sudah masuk.",
     "invalid_link": "Tautan reset ini tidak valid atau sudah kedaluwarsa.",
     "request_new": "Minta tautan baru"
+  },
+  "report": {
+    "title": "Laporan Perawatan",
+    "period": "{{count}} hari terakhir",
+    "adherence": "Kepatuhan minum obat",
+    "vitals": "Tanda vital",
+    "alerts": "Peringatan penting",
+    "col_date": "Tanggal",
+    "col_type": "Jenis",
+    "col_value": "Nilai",
+    "col_alert": "Peringatan",
+    "no_vitals": "Tidak ada tanda vital pada periode ini",
+    "no_alerts": "Tidak ada peringatan pada periode ini",
+    "generated": "Dibuat dengan CareTap · {{date}}"
   }
 }

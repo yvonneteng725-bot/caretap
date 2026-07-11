@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CardType } from '../types'
 import { CARD_ACCENTS } from '../types'
@@ -34,14 +33,8 @@ export function ConfirmationScreen({
   onBackHome,
 }: Props) {
   const { t, i18n } = useTranslation()
-  const [showBack, setShowBack] = useState(false)
   const accent = CARD_ACCENTS[cardType]
   const Icon = CARD_ICONS[cardType]
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowBack(true), 4000)
-    return () => clearTimeout(timer)
-  }, [])
 
   const date = new Date(loggedAt)
   const locale = DATE_LOCALES[i18n.language] ?? 'en-US'
@@ -61,16 +54,16 @@ export function ConfirmationScreen({
         <Icon color={accent.accent} />
       </div>
 
-      <div className="mt-10 space-y-1 text-center" style={{ color: accent.dark }}>
-        <p className="font-light">✓ {t('confirmation.logged_en')}</p>
-        <p className="font-light">✓ {t('confirmation.logged_zh')}</p>
-        <p className="font-light">✓ {t('confirmation.logged_id')}</p>
+      <div className="mt-10 space-y-1.5 text-center" style={{ color: accent.dark }}>
+        <p className="text-lg font-light">✓ {t('confirmation.logged_en')}</p>
+        <p className="text-lg font-light">✓ {t('confirmation.logged_zh')}</p>
+        <p className="text-lg font-light">✓ {t('confirmation.logged_id')}</p>
       </div>
 
       <p className="mt-8 text-4xl font-light text-text-primary" style={{ fontSize: '2.5rem' }}>
         {timeStr}
       </p>
-      <p className="mt-1 text-sm font-light text-text-secondary">{dateStr}</p>
+      <p className="mt-1 text-base font-light text-text-secondary">{dateStr}</p>
 
       {alertMessage && (
         <div className="mt-4 w-full max-w-sm">
@@ -89,11 +82,11 @@ export function ConfirmationScreen({
           value={note}
           onChange={(e) => onNoteChange(e.target.value)}
           placeholder={t('confirmation.add_note')}
-          className="w-full rounded-full border border-divider bg-surface px-5 py-3 text-sm outline-none placeholder:text-text-muted"
+          className="w-full rounded-full border border-divider bg-surface px-5 py-3.5 text-base outline-none placeholder:text-text-muted"
         />
       </div>
 
-      <p className="mt-4 text-xs font-light text-text-muted">
+      <p className="mt-4 text-sm font-light text-text-muted">
         {t('confirmation.todays_count', { cardType: t(`card_types.${cardType}`), count: todayCount })}
       </p>
 
@@ -101,9 +94,8 @@ export function ConfirmationScreen({
 
       <button
         onClick={onBackHome}
-        className={`mt-10 text-xs font-light text-text-muted transition-opacity duration-500 ${
-          showBack ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
+        className="mt-10 w-full max-w-sm rounded-full py-4 text-base font-light text-white shadow-card"
+        style={{ backgroundColor: accent.dark }}
       >
         {t('confirmation.back_home')}
       </button>
