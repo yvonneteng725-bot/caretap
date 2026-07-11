@@ -47,7 +47,7 @@ export async function getQueuedLogs(): Promise<QueuedLog[]> {
   })
 }
 
-async function removeQueuedLog(queueId: string): Promise<void> {
+export async function removeQueuedLog(queueId: string): Promise<void> {
   const db = await openDB()
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite')

@@ -21,9 +21,14 @@ export function CalendarHeatmap({ logs, accent, days = 30 }: Props) {
         <div
           key={date.toISOString()}
           title={date.toLocaleDateString()}
-          className="aspect-square rounded-md"
-          style={{ backgroundColor: logged ? accent : 'rgba(200,184,154,0.15)' }}
-        />
+          className="flex aspect-square items-center justify-center rounded-md text-xs font-light"
+          style={{
+            backgroundColor: logged ? accent : 'rgba(200,184,154,0.15)',
+            color: logged ? '#FFFFFF' : '#9A8C7E',
+          }}
+        >
+          {date.getDate()}
+        </div>
       ))}
     </div>
   )

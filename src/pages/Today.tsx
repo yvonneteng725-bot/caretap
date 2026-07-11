@@ -25,7 +25,15 @@ const CARD_EMOJI: Record<string, string> = {
 export default function Today() {
   const { t, i18n } = useTranslation()
   const { elders, selectedElder, selectedElderId, selectElder } = useElders()
-  const { logs, loading } = useLogFeed(selectedElderId, 3)
+  // 3-day fetch so the medication-due check has context, but the feed itself
+  // must only show today — otherwise yesterday's rows linger after midnight.
+  const { logs, loading, reload } = useLogFeed(selectedElderId, 3)
+
+  const todayLogs = useMemo(() => {
+    const startOfDay = new Date()
+    startOfDay.setHours(0, 0, 0, 0)
+    return logs.filter((l) => new Date(l.logged_at) >= startOfDay)
+  }, [logs])
 
   const locale = DATE_LOCALES[i18n.language] ?? 'en-US'
   const dateStr = new Intl.DateTimeFormat(locale, { weekday: 'long', day: '2-digit', month: 'long' }).format(new Date())
@@ -93,7 +101,7 @@ export default function Today() {
         {loading ? (
           <p className="px-6 py-10 text-center text-sm font-light text-text-muted">{t('common.loading')}</p>
         ) : (
-          <TodayFeed logs={logs} />
+          <TodayFeed logs={todayLogs} onChanged={reload} />
         )}
       </div>
     </div>

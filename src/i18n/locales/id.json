@@ -21,7 +21,8 @@
     "add_photo": "Tambah foto (opsional)",
     "back_home": "← Kembali ke beranda",
     "photo_failed": "Foto gagal disimpan: {{message}}",
-    "save_failed": "Catatan ini gagal disimpan: {{message}}"
+    "save_failed": "Catatan ini gagal disimpan: {{message}}",
+    "undo": "Salah catat? Batalkan & hapus"
   },
   "meal_intake": {
     "label": "Berapa banyak yang dimakan?",
@@ -51,7 +52,12 @@
     "fasting": "Puasa",
     "glucose_normal": "Normal: puasa 3,9–6,1 / setelah makan <7,8 mmol/L",
     "spo2": "Saturasi oksigen SpO₂ (%)",
-    "spo2_normal": "Normal: SpO₂ 95–100%"
+    "spo2_normal": "Normal: SpO₂ 95–100%",
+    "scan": "Pindai monitor dengan kamera",
+    "scan_reading": "Membaca foto...",
+    "scan_check": "Angka diisi dari foto Anda — periksa sebelum menyimpan.",
+    "scan_nothing": "Tidak menemukan angka pada foto. Coba foto layar lebih jelas.",
+    "scan_failed": "Gagal membaca foto: {{message}}"
   },
   "alerts": {
     "bp_high": "Tekanan darah tinggi",
@@ -153,6 +159,20 @@
     "col_alert": "Peringatan",
     "no_vitals": "Tidak ada tanda vital pada periode ini",
     "no_alerts": "Tidak ada peringatan pada periode ini",
-    "generated": "Dibuat dengan CareTap · {{date}}"
+    "generated": "Dibuat dengan CareTap · {{date}}",
+    "bp_trend": "Tren tekanan darah",
+    "temp_trend": "Tren suhu",
+    "col_sys": "SIS (H)",
+    "col_dia": "DIA (L)",
+    "col_temp": "Suhu °C",
+    "col_glucose": "Gula mmol/L",
+    "col_note": "Catatan",
+    "series_sys": "SIS",
+    "series_dia": "DIA"
+  },
+  "feed": {
+    "delete": "Hapus",
+    "confirm_delete": "Ketuk untuk konfirmasi",
+    "update_failed": "Perubahan gagal disimpan — coba lagi."
   }
 }

@@ -21,7 +21,8 @@
     "add_photo": "Add photo (optional)",
     "back_home": "← Back to home",
     "photo_failed": "Photo couldn't be saved: {{message}}",
-    "save_failed": "This entry couldn't be saved: {{message}}"
+    "save_failed": "This entry couldn't be saved: {{message}}",
+    "undo": "Wrong entry? Undo & delete"
   },
   "meal_intake": {
     "label": "How much did they eat?",
@@ -51,7 +52,12 @@
     "fasting": "Fasting",
     "glucose_normal": "Normal: 3.9–6.1 fasting / <7.8 after meal",
     "spo2": "Blood oxygen SpO₂ (%)",
-    "spo2_normal": "Normal: SpO₂ 95–100%"
+    "spo2_normal": "Normal: SpO₂ 95–100%",
+    "scan": "Scan monitor with camera",
+    "scan_reading": "Reading photo...",
+    "scan_check": "Numbers filled from your photo — please check them before saving.",
+    "scan_nothing": "Couldn't find readings in the photo. Try a clearer shot of the display.",
+    "scan_failed": "Couldn't read the photo: {{message}}"
   },
   "alerts": {
     "bp_high": "Blood pressure is elevated",
@@ -153,6 +159,20 @@
     "col_alert": "Alert",
     "no_vitals": "No vitals recorded in this period",
     "no_alerts": "No alerts in this period",
-    "generated": "Generated with CareTap · {{date}}"
+    "generated": "Generated with CareTap · {{date}}",
+    "bp_trend": "Blood pressure trend",
+    "temp_trend": "Temperature trend",
+    "col_sys": "SYS (H)",
+    "col_dia": "DIA (L)",
+    "col_temp": "Temp °C",
+    "col_glucose": "Glucose mmol/L",
+    "col_note": "Note",
+    "series_sys": "SYS",
+    "series_dia": "DIA"
+  },
+  "feed": {
+    "delete": "Delete",
+    "confirm_delete": "Tap to confirm",
+    "update_failed": "Couldn't save the change — please try again."
   }
 }

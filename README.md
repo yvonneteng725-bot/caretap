@@ -25,18 +25,32 @@ Apply the database schema and RLS policies:
 supabase db push        # or run supabase/migrations/001_initial.sql manually
 ```
 
-Deploy the Edge Functions (push alerts + the photo-upload fallback):
+Deploy the Edge Functions (push alerts, photo-upload fallback, BP scan):
 
 ```bash
 supabase functions deploy send-alert
 supabase functions deploy medication-check
 supabase functions deploy upload-photo
+supabase functions deploy read-bp
 ```
 
 `upload-photo` matters even if you skip push notifications: it is the
 fallback path for saving log photos and profile pictures when the storage
 RLS policies couldn't be created by migrations (see "Storage buckets &
 policies" below).
+
+`read-bp` powers "scan the blood pressure monitor with the camera" — it
+sends the photo to Google Gemini to extract SYS/DIA/pulse/SpO₂ and
+prefills the input fields (the user always confirms before saving). It
+needs a Gemini API key (free tier available at
+https://aistudio.google.com/apikey):
+
+```bash
+supabase secrets set GEMINI_API_KEY=your-key-here
+```
+
+Without the key the scan button shows a clear error and manual entry
+keeps working.
 
 Schedule `medication-check` to run every 30 minutes from the Supabase
 dashboard (Edge Functions → Cron), and set the `VAPID_PUBLIC_KEY`,

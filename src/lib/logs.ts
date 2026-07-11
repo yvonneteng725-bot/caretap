@@ -1,4 +1,4 @@
-import { enqueueLog } from './offlineQueue'
+import { enqueueLog, removeQueuedLog } from './offlineQueue'
 import { insertLog } from './insertLog'
 import { supabase } from './supabase'
 import { checkAlert, sendAlert } from './alerts'
@@ -85,6 +85,13 @@ export async function persistLog(log: Log): Promise<PersistResult> {
   const alertKey = checkAlert(log)
   if (alertKey) sendAlert(log.elder_id, log.id, alertKey)
   return { status: 'saved' }
+}
+
+export async function deleteLog(logId: string): Promise<boolean> {
+  // The entry may still be sitting in the offline queue rather than the DB.
+  await removeQueuedLog(logId).catch(() => {})
+  const { error } = await supabase.from('logs').delete().eq('id', logId)
+  return !error
 }
 
 // The log row is inserted optimistically in the background, so an update
