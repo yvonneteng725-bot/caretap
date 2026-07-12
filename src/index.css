@@ -9,6 +9,12 @@
     height: 100%;
   }
 
+  /* Larger type across the app for older users: Tailwind sizes and spacing
+     are rem-based, so bumping the root size scales everything evenly. */
+  html {
+    font-size: 17.5px;
+  }
+
   body {
     @apply bg-bg text-text-primary;
     font-family: 'Inter Tight', 'Noto Sans TC', sans-serif;
@@ -34,7 +40,7 @@
   .brand-label {
     font-weight: 200;
     letter-spacing: 0.3em;
-    color: #9a8c7e;
+    color: #7e7060;
   }
 
   .hairline {

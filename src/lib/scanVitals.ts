@@ -24,7 +24,9 @@ function blobToBase64(blob: Blob): Promise<string> {
 // (Gemini vision) and returns the extracted readings. The caller prefills
 // the input fields with them — the user always confirms before saving.
 export async function scanBloodPressurePhoto(file: File): Promise<ScannedVitals> {
-  const compressed = await compressPhoto(file, 400)
+  // Keep the image small — Gemini bills vision input by resolution, and a
+  // monitor display is perfectly readable at 900px / ~150KB.
+  const compressed = await compressPhoto(file, 150, 900)
   const base64 = await blobToBase64(compressed)
 
   const { data, error } = await supabase.functions.invoke('read-bp', {

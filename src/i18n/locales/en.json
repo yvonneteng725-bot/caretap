@@ -57,7 +57,8 @@
     "scan_reading": "Reading photo...",
     "scan_check": "Numbers filled from your photo — please check them before saving.",
     "scan_nothing": "Couldn't find readings in the photo. Try a clearer shot of the display.",
-    "scan_failed": "Couldn't read the photo: {{message}}"
+    "scan_failed": "Couldn't read the photo: {{message}}",
+    "scan_quota": "The photo-reading service hit its usage limit — wait a minute and try once more."
   },
   "alerts": {
     "bp_high": "Blood pressure is elevated",
@@ -68,7 +69,8 @@
     "meal_refused": "{{name}} refused their meal",
     "medication_due": "Medications may be due",
     "high_badge": "High",
-    "spo2_low": "Blood oxygen is low"
+    "spo2_low": "Blood oxygen is low",
+    "low_badge": "Low"
   },
   "settings": {
     "language": "Display language",

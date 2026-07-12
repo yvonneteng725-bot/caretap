@@ -34,8 +34,24 @@ export function useLogFeed(elderId: string | null, days = 30, cardType?: CardTyp
 
   useRealtimeLogs(elderId, (log) => {
     if (cardType && log.card_type !== cardType) return
-    setLogs((prev) => [log, ...prev.filter((l) => l.id !== log.id)])
+    setLogs((prev) =>
+      prev.some((l) => l.id === log.id)
+        ? // Update in place (merge keeps client-side joins like logged_by_name)
+          prev.map((l) => (l.id === log.id ? { ...l, ...log } : l))
+        : [log, ...prev],
+    )
   })
 
-  return { logs, loading, reload: load }
+  // Apply an edit/delete to the in-memory list immediately, so the UI (e.g.
+  // an alert badge on a corrected reading) reflects the change without
+  // waiting on a refetch.
+  const patchLocal = useCallback((logId: string, fields: Partial<Log>) => {
+    setLogs((prev) => prev.map((l) => (l.id === logId ? { ...l, ...fields } : l)))
+  }, [])
+
+  const removeLocal = useCallback((logId: string) => {
+    setLogs((prev) => prev.filter((l) => l.id !== logId))
+  }, [])
+
+  return { logs, loading, reload: load, patchLocal, removeLocal }
 }

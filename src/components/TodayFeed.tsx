@@ -20,11 +20,16 @@ interface Props {
   // History shows rows spanning many days, so include the date; the Today
   // tab only shows today and keeps just the time.
   showDate?: boolean
-  // Called after an edit or delete so the owner can refetch.
-  onChanged?: () => void
+  // Apply the change to the in-memory list immediately. Deliberately NOT
+  // followed by a refetch: a read that races the write can return the stale
+  // row and clobber the correction (seen in production as an alert badge
+  // that survived the fix). The PATCH/DELETE we just made is authoritative,
+  // and realtime UPDATE events keep other viewers in sync.
+  onEdited?: (logId: string, fields: Partial<Log>) => void
+  onDeleted?: (logId: string) => void
 }
 
-export function TodayFeed({ logs, showDate = false, onChanged }: Props) {
+export function TodayFeed({ logs, showDate = false, onEdited, onDeleted }: Props) {
   const { t, i18n } = useTranslation()
   const locale = DATE_LOCALES[i18n.language] ?? 'en-US'
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -65,7 +70,9 @@ export function TodayFeed({ logs, showDate = false, onChanged }: Props) {
                   {log.logged_by_name && (
                     <span className="text-xs font-light text-text-muted">· {log.logged_by_name}</span>
                   )}
-                  {alert && <AlertPill label={t('alerts.high_badge')} />}
+                  {alert && (
+                    <AlertPill label={alert.endsWith('_low') ? t('alerts.low_badge') : t('alerts.high_badge')} />
+                  )}
                 </div>
                 {value && <p className="mt-1 text-xs font-light text-text-secondary">{value}</p>}
                 {log.note && <p className="mt-1 text-xs font-light text-text-secondary">{log.note}</p>}
@@ -78,7 +85,14 @@ export function TodayFeed({ logs, showDate = false, onChanged }: Props) {
               </span>
             </button>
 
-            {expanded && <LogDetail log={log} onChanged={onChanged} onClose={() => setExpandedId(null)} />}
+            {expanded && (
+              <LogDetail
+                log={log}
+                onEdited={onEdited}
+                onDeleted={onDeleted}
+                onClose={() => setExpandedId(null)}
+              />
+            )}
           </div>
         )
       })}
@@ -89,7 +103,17 @@ export function TodayFeed({ logs, showDate = false, onChanged }: Props) {
 const detailInput =
   'w-full rounded-full border border-divider bg-bg px-4 py-2 text-sm font-normal outline-none'
 
-function LogDetail({ log, onChanged, onClose }: { log: Log; onChanged?: () => void; onClose: () => void }) {
+function LogDetail({
+  log,
+  onEdited,
+  onDeleted,
+  onClose,
+}: {
+  log: Log
+  onEdited?: (logId: string, fields: Partial<Log>) => void
+  onDeleted?: (logId: string) => void
+  onClose: () => void
+}) {
   const { t, i18n } = useTranslation()
   const locale = DATE_LOCALES[i18n.language] ?? 'en-US'
 
@@ -141,7 +165,7 @@ function LogDetail({ log, onChanged, onClose }: { log: Log; onChanged?: () => vo
       setError(t('feed.update_failed'))
       return
     }
-    onChanged?.()
+    onEdited?.(log.id, fields)
     onClose()
   }
 
@@ -157,7 +181,7 @@ function LogDetail({ log, onChanged, onClose }: { log: Log; onChanged?: () => vo
       setError(t('feed.update_failed'))
       return
     }
-    onChanged?.()
+    onDeleted?.(log.id)
     onClose()
   }
 

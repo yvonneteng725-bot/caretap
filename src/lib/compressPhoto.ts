@@ -1,11 +1,10 @@
 // Compress an image File to target size before upload
-export async function compressPhoto(file: File, targetKB = 200): Promise<Blob> {
+export async function compressPhoto(file: File, targetKB = 200, maxDim = 1200): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     const url = URL.createObjectURL(file)
     img.onload = () => {
       const canvas = document.createElement('canvas')
-      const maxDim = 1200
       let { width, height } = img
       if (width > maxDim || height > maxDim) {
         const ratio = Math.min(maxDim / width, maxDim / height)
