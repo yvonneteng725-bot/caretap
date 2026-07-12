@@ -82,31 +82,67 @@ Deno.serve(async (req) => {
     })
 
     // Cheapest first; skip to the next model when this key has no quota
-    // for it (429) or doesn't offer it (404/403).
-    const models = [
+    // for it (429) or doesn't offer it (404/403). Google retires models
+    // fast (2.0-flash-lite was shut down 2026-06), so if every known name
+    // fails we ask the API which flash/lite models THIS key can actually
+    // call and try those instead of failing.
+    const knownModels = [
       Deno.env.get('GEMINI_MODEL'),
-      'gemini-2.0-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-3-flash',
+      'gemini-3-flash-preview',
       'gemini-2.5-flash-lite',
-      'gemini-2.0-flash',
+      'gemini-2.5-flash',
     ].filter((m, i, arr): m is string => !!m && arr.indexOf(m) === i)
 
     let result: Record<string, unknown> | null = null
     let lastError = ''
     let quotaHit = false
+    const tried = new Set<string>()
 
-    for (const model of models) {
+    const tryModel = async (model: string): Promise<boolean> => {
+      tried.add(model)
       const geminiRes = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
         { method: 'POST', headers: { 'Content-Type': 'application/json' }, body },
       )
       if (geminiRes.ok) {
         result = await geminiRes.json()
-        break
+        return true
       }
       const detail = await geminiRes.text()
       lastError = `${model}: ${geminiRes.status} ${detail.slice(0, 150)}`
       if (geminiRes.status === 429) quotaHit = true
-      if (![429, 404, 403].includes(geminiRes.status)) break
+      // A non-quota, non-availability error won't improve with other models.
+      if (![429, 404, 403].includes(geminiRes.status)) throw new Error(lastError)
+      return false
+    }
+
+    for (const model of knownModels) {
+      if (await tryModel(model)) break
+    }
+
+    if (!result) {
+      // Discover what this key can actually use (names change over time).
+      const listRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=100`,
+      )
+      if (listRes.ok) {
+        const listing = (await listRes.json()) as {
+          models?: { name?: string; supportedGenerationMethods?: string[] }[]
+        }
+        const discovered = (listing.models ?? [])
+          .filter((m) => m.supportedGenerationMethods?.includes('generateContent'))
+          .map((m) => (m.name ?? '').replace(/^models\//, ''))
+          .filter((n) => /flash/i.test(n) && !/thinking|image|live|audio|tts|exp/i.test(n))
+          // Prefer lite (cheapest / most generous free quota) first.
+          .sort((a, b) => Number(/lite/i.test(b)) - Number(/lite/i.test(a)))
+          .filter((n) => !tried.has(n))
+          .slice(0, 4)
+        for (const model of discovered) {
+          if (await tryModel(model)) break
+        }
+      }
     }
 
     if (!result) {

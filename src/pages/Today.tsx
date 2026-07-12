@@ -82,10 +82,15 @@ export default function Today() {
           )}
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        {/* Fixed six-column grid so the chips always fit one row on phones */}
+        <div className="mt-5 grid grid-cols-6 gap-1.5">
           {CARD_TYPES.map((ct) => (
-            <span key={ct} className="rounded-full bg-bg px-3 py-1 text-xs font-light text-text-secondary">
-              {CARD_EMOJI[ct]} {todayCounts[ct] ?? 0}
+            <span
+              key={ct}
+              className="flex items-center justify-center gap-1 whitespace-nowrap rounded-full bg-bg px-1 py-1.5 text-xs font-light text-text-secondary"
+            >
+              <span>{CARD_EMOJI[ct]}</span>
+              {todayCounts[ct] ?? 0}
             </span>
           ))}
         </div>
