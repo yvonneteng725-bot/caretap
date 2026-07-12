@@ -57,7 +57,8 @@
     "scan_reading": "讀取中…",
     "scan_check": "已從照片讀取數值，儲存前請確認是否正確。",
     "scan_nothing": "無法從照片辨識數值，請對準螢幕再拍一次。",
-    "scan_failed": "照片讀取失敗：{{message}}"
+    "scan_failed": "照片讀取失敗：{{message}}",
+    "scan_quota": "讀取服務暫時達到用量上限，請稍候一分鐘再試一次。"
   },
   "alerts": {
     "bp_high": "血壓偏高",
@@ -68,7 +69,8 @@
     "meal_refused": "{{name}} 拒絕進食",
     "medication_due": "用藥時間可能到了",
     "high_badge": "偏高",
-    "spo2_low": "血氧偏低"
+    "spo2_low": "血氧偏低",
+    "low_badge": "偏低"
   },
   "settings": {
     "language": "顯示語言",

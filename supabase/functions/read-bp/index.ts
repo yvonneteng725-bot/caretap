@@ -8,6 +8,14 @@
 // Deploy:  supabase functions deploy read-bp
 // Secrets: GEMINI_API_KEY (from https://aistudio.google.com/apikey), plus
 //          the auto-provided SUPABASE_URL / SUPABASE_ANON_KEY.
+//          Optional: GEMINI_MODEL to pin a specific model.
+//
+// Quota notes: free-tier keys have small per-model request budgets, and
+// some models have no free quota at all. We default to the cheapest lite
+// model and fall through a list of alternatives whenever a model answers
+// 429 (quota) or 404 (not available for this key). One photo = exactly one
+// request to one model (no retries on success paths), with a tiny
+// max_output_tokens, so usage stays minimal.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
@@ -56,37 +64,57 @@ Deno.serve(async (req) => {
       return json({ error: 'Invalid or oversized image' }, 400)
     }
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
+    const body = JSON.stringify({
+      contents: [
+        {
+          parts: [
+            { text: PROMPT },
             {
-              parts: [
-                { text: PROMPT },
-                {
-                  inline_data: {
-                    mime_type: typeof contentType === 'string' ? contentType : 'image/jpeg',
-                    data: base64,
-                  },
-                },
-              ],
+              inline_data: {
+                mime_type: typeof contentType === 'string' ? contentType : 'image/jpeg',
+                data: base64,
+              },
             },
           ],
-          generationConfig: { temperature: 0, responseMimeType: 'application/json' },
-        }),
-      },
-    )
+        },
+      ],
+      generationConfig: { temperature: 0, responseMimeType: 'application/json', maxOutputTokens: 64 },
+    })
 
-    if (!geminiRes.ok) {
+    // Cheapest first; skip to the next model when this key has no quota
+    // for it (429) or doesn't offer it (404/403).
+    const models = [
+      Deno.env.get('GEMINI_MODEL'),
+      'gemini-2.0-flash-lite',
+      'gemini-2.5-flash-lite',
+      'gemini-2.0-flash',
+    ].filter((m, i, arr): m is string => !!m && arr.indexOf(m) === i)
+
+    let result: Record<string, unknown> | null = null
+    let lastError = ''
+    let quotaHit = false
+
+    for (const model of models) {
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body },
+      )
+      if (geminiRes.ok) {
+        result = await geminiRes.json()
+        break
+      }
       const detail = await geminiRes.text()
-      return json({ error: `Gemini API error (${geminiRes.status}): ${detail.slice(0, 200)}` }, 502)
+      lastError = `${model}: ${geminiRes.status} ${detail.slice(0, 150)}`
+      if (geminiRes.status === 429) quotaHit = true
+      if (![429, 404, 403].includes(geminiRes.status)) break
     }
 
-    const result = await geminiRes.json()
-    const text: string = result?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    if (!result) {
+      if (quotaHit) return json({ error: 'quota_exceeded', detail: lastError }, 429)
+      return json({ error: `Gemini API error: ${lastError}` }, 502)
+    }
+    const candidates = (result as { candidates?: { content?: { parts?: { text?: string }[] } }[] }).candidates
+    const text: string = candidates?.[0]?.content?.parts?.[0]?.text ?? ''
     let parsed: Record<string, unknown>
     try {
       parsed = JSON.parse(text)

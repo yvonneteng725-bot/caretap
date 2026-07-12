@@ -10,9 +10,12 @@ export default {
       colors: {
         bg: '#E2DDD6',
         surface: '#FAFAF7',
-        'text-primary': '#2A2218',
-        'text-secondary': '#8A7E72',
-        'text-muted': '#9A8C7E',
+        // Darker than the original palette on purpose: the primary users are
+        // elderly, so secondary/muted text needs real contrast on the cream
+        // surfaces while keeping the warm tone.
+        'text-primary': '#231C12',
+        'text-secondary': '#665A4C',
+        'text-muted': '#7E7060',
         divider: 'rgba(200, 184, 154, 0.4)',
         medications: { accent: '#7B9E87', dark: '#3D6B58' },
         'blood-pressure': { accent: '#B07B7B', dark: '#7A4545' },

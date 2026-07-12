@@ -27,7 +27,7 @@ export default function Today() {
   const { elders, selectedElder, selectedElderId, selectElder } = useElders()
   // 3-day fetch so the medication-due check has context, but the feed itself
   // must only show today — otherwise yesterday's rows linger after midnight.
-  const { logs, loading, reload } = useLogFeed(selectedElderId, 3)
+  const { logs, loading, patchLocal, removeLocal } = useLogFeed(selectedElderId, 3)
 
   const todayLogs = useMemo(() => {
     const startOfDay = new Date()
@@ -101,7 +101,7 @@ export default function Today() {
         {loading ? (
           <p className="px-6 py-10 text-center text-sm font-light text-text-muted">{t('common.loading')}</p>
         ) : (
-          <TodayFeed logs={todayLogs} onChanged={reload} />
+          <TodayFeed logs={todayLogs} onEdited={patchLocal} onDeleted={removeLocal} />
         )}
       </div>
     </div>

@@ -52,6 +52,17 @@ supabase secrets set GEMINI_API_KEY=your-key-here
 Without the key the scan button shows a clear error and manual entry
 keeps working.
 
+Free-tier Gemini keys have small per-model quotas, and some models have no
+free quota at all. `read-bp` therefore starts with the cheapest lite model
+and automatically falls through `gemini-2.0-flash-lite` →
+`gemini-2.5-flash-lite` → `gemini-2.0-flash` on quota/availability errors.
+Images are downscaled to ~900px before upload and each scan is exactly one
+request. To pin a specific model:
+
+```bash
+supabase secrets set GEMINI_MODEL=gemini-2.0-flash-lite
+```
+
 Schedule `medication-check` to run every 30 minutes from the Supabase
 dashboard (Edge Functions → Cron), and set the `VAPID_PUBLIC_KEY`,
 `VAPID_PRIVATE_KEY`, and `VAPID_EMAIL` function secrets.

@@ -74,7 +74,11 @@ function BloodPressureInput({ onSave }: { onSave: (v: BPSave) => void }) {
       setScanNotice(t('vitals.scan_check'))
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
-      setScanError(t('vitals.scan_failed', { message }))
+      if (/quota|429|rate.?limit|resource_exhausted/i.test(message)) {
+        setScanError(t('vitals.scan_quota'))
+      } else {
+        setScanError(t('vitals.scan_failed', { message }))
+      }
     } finally {
       setScanning(false)
     }

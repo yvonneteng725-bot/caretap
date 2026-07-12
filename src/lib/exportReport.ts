@@ -25,7 +25,7 @@ interface TrendSeries {
 
 // Minimal inline-SVG line chart so the printable report needs no JS or
 // external chart library. Matches the soft look of the History tab charts.
-function svgTrend(series: TrendSeries[], w = 300, h = 110): string {
+function svgTrend(series: TrendSeries[], fmtTick: (t: number) => string, w = 300, h = 124): string {
   const all = series.flatMap((s) => s.points)
   if (all.length === 0) return ''
 
@@ -37,8 +37,9 @@ function svgTrend(series: TrendSeries[], w = 300, h = 110): string {
   const lo = minV - pad
   const hi = maxV + pad
 
-  const X = (t: number) => (maxT === minT ? w / 2 : 30 + ((t - minT) / (maxT - minT)) * (w - 38))
-  const Y = (v: number) => h - 18 - ((v - lo) / (hi - lo)) * (h - 30)
+  const baseY = h - 28 // x-axis line; date ticks and legend sit below it
+  const X = (t: number) => (maxT === minT ? (30 + w - 6) / 2 : 30 + ((t - minT) / (maxT - minT)) * (w - 38))
+  const Y = (v: number) => baseY - ((v - lo) / (hi - lo)) * (baseY - 12)
 
   const lines = series
     .filter((s) => s.points.length > 0)
@@ -55,6 +56,16 @@ function svgTrend(series: TrendSeries[], w = 300, h = 110): string {
     })
     .join('')
 
+  // Date ticks: first and last reading, plus a middle one when they differ.
+  const midT = (minT + maxT) / 2
+  const ticks = (maxT === minT ? [minT] : [minT, midT, maxT])
+    .map((t, i, arr) => {
+      const anchor = arr.length === 1 || i === 1 ? 'middle' : i === 0 ? 'start' : 'end'
+      const x = arr.length === 1 ? X(t) : i === 0 ? 30 : i === 1 ? X(t) : w - 6
+      return `<text x="${x}" y="${baseY + 12}" font-size="9" fill="${MUTED}" text-anchor="${anchor}">${escapeHtml(fmtTick(t))}</text>`
+    })
+    .join('')
+
   const legend = series
     .filter((s) => s.points.length > 0)
     .map(
@@ -65,11 +76,12 @@ function svgTrend(series: TrendSeries[], w = 300, h = 110): string {
     .join('')
 
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img">
-    <line x1="30" y1="${Y(hi).toFixed(1)}" x2="30" y2="${Y(lo).toFixed(1)}" stroke="${HAIRLINE}" stroke-width="1"/>
-    <line x1="30" y1="${h - 18}" x2="${w - 6}" y2="${h - 18}" stroke="${HAIRLINE}" stroke-width="1"/>
+    <line x1="30" y1="${Y(hi).toFixed(1)}" x2="30" y2="${baseY}" stroke="${HAIRLINE}" stroke-width="1"/>
+    <line x1="30" y1="${baseY}" x2="${w - 6}" y2="${baseY}" stroke="${HAIRLINE}" stroke-width="1"/>
     <text x="26" y="${(Y(maxV) + 3).toFixed(1)}" font-size="9" fill="${MUTED}" text-anchor="end">${Math.round(maxV * 10) / 10}</text>
     <text x="26" y="${(Y(minV) + 3).toFixed(1)}" font-size="9" fill="${MUTED}" text-anchor="end">${Math.round(minV * 10) / 10}</text>
     ${lines}
+    ${ticks}
     ${legend}
   </svg>`
 }
@@ -118,6 +130,8 @@ export function generateReportHtml(elder: Elder, logs: Log[], days: number): str
     : 0
 
   // Trend data
+  const fmtTick = (t: number) =>
+    new Intl.DateTimeFormat(locale, { month: 'numeric', day: 'numeric' }).format(new Date(t))
   const bpLogs = vitals.filter((l) => l.card_type === 'blood_pressure')
   const bpChart = svgTrend([
     {
@@ -134,7 +148,7 @@ export function generateReportHtml(elder: Elder, logs: Log[], days: number): str
         .filter((l) => l.bp_diastolic != null)
         .map((l) => ({ t: new Date(l.logged_at).getTime(), v: l.bp_diastolic! })),
     },
-  ])
+  ], fmtTick)
   const tempChart = svgTrend([
     {
       color: CARD_ACCENTS.body_temperature.accent,
@@ -143,7 +157,7 @@ export function generateReportHtml(elder: Elder, logs: Log[], days: number): str
         .filter((l) => l.card_type === 'body_temperature' && l.temperature_c != null)
         .map((l) => ({ t: new Date(l.logged_at).getTime(), v: l.temperature_c! })),
     },
-  ])
+  ], fmtTick)
 
   const typeChip = (cardType: Log['card_type']) => {
     const accent = CARD_ACCENTS[cardType]
